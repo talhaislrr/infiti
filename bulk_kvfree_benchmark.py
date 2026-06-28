@@ -42,10 +42,13 @@ def _unload(*objs) -> None:
     gc.collect()
 
 
-def make_prompt(tokenizer, text: str, target: int) -> torch.Tensor:
-    while len(tokenizer.encode(text)) < target:
-        text += " " + text
-    return torch.tensor([tokenizer.encode(text)[:target]], dtype=torch.long)
+def make_prompt(tokenizer, text: str, target: int, max_len: int = 2048) -> torch.Tensor:
+    target = min(target, max_len)
+    chunk = text
+    while len(tokenizer.encode(chunk, add_special_tokens=False)) < target:
+        chunk += " " + text
+    ids = tokenizer.encode(chunk, add_special_tokens=False)[:target]
+    return torch.tensor([ids], dtype=torch.long)
 
 
 @torch.no_grad()

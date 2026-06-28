@@ -20,6 +20,37 @@ from bulk_state import BulkStateTensors
 from bulk_trigger_v2 import BulkTriggerDecoderLayerV2
 
 
+def _create_causal_mask_compat(
+    config,
+    hidden: torch.Tensor,
+    attention_mask: Optional[torch.Tensor],
+    cache_position: torch.Tensor,
+    past_key_values: Any,
+    position_ids: torch.Tensor,
+) -> Any:
+    """transformers 4.x (input_embeds) ve 5.9+ (inputs_embeds, cache_position yok) uyumu."""
+    from transformers.models.llama.modeling_llama import create_causal_mask
+    import inspect
+
+    sig = inspect.signature(create_causal_mask)
+    params = sig.parameters
+    kwargs: dict[str, Any] = {
+        "config": config,
+        "attention_mask": attention_mask,
+        "past_key_values": past_key_values,
+        "position_ids": position_ids,
+    }
+    if "inputs_embeds" in params:
+        kwargs["inputs_embeds"] = hidden
+    elif "input_embeds" in params:
+        kwargs["input_embeds"] = hidden
+    else:
+        raise RuntimeError("create_causal_mask: embed kwarg bulunamadı")
+    if "cache_position" in params:
+        kwargs["cache_position"] = cache_position
+    return create_causal_mask(**kwargs)
+
+
 class CompactBulkCore(nn.Module):
     """
     H=2048 → d_bulk=256 bottleneck — ~3M param/katman (554M yerine).
@@ -323,7 +354,6 @@ class TinyLlamaKVFreeTail(nn.Module):
         cache_position: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, Any]:
         from transformers.cache_utils import DynamicCache
-        from transformers.models.llama.modeling_llama import create_causal_mask
 
         model = self.base.model
         if use_cache and past_key_values is None:
@@ -338,13 +368,13 @@ class TinyLlamaKVFreeTail(nn.Module):
             )
 
         position_ids = cache_position.unsqueeze(0)
-        causal_mask = create_causal_mask(
-            config=model.config,
-            input_embeds=hidden,
-            attention_mask=attention_mask,
-            cache_position=cache_position,
-            past_key_values=past_key_values,
-            position_ids=position_ids,
+        causal_mask = _create_causal_mask_compat(
+            model.config,
+            hidden,
+            attention_mask,
+            cache_position,
+            past_key_values,
+            position_ids,
         )
         position_embeddings = model.rotary_emb(hidden, position_ids)
 
