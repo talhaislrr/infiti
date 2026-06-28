@@ -86,15 +86,37 @@ def make_chunk(tokenizer, target_tokens: int, seed: str, max_len: int = 2048) ->
     return torch.tensor([ids], dtype=torch.long)
 
 
+def resolve_swap_checkpoint(path: str) -> Path:
+    """Colab Drive yedek yolları dene."""
+    p = Path(path)
+    if p.exists():
+        return p
+    for fb in (
+        Path("/content/drive/MyDrive/infiti/bulk_v2.pt"),
+        Path("/content/drive/MyDrive/infiti/bulk_v2_memory_quick.pt"),
+        Path("checkpoints/bulk_swap/bulk_v2.pt"),
+    ):
+        if fb.exists():
+            print(f"  checkpoint (fallback): {fb}")
+            return fb
+    return p
+
+
 @torch.inference_mode()
-def measure_decode_ms(gen, n_steps: int = 16) -> float:
+def measure_decode_ms(
+    gen,
+    n_steps: int,
+    device: torch.device,
+    seed_tok: int = 1,
+) -> float:
     t0 = time.perf_counter()
-    tok = torch.tensor([1], dtype=torch.long)
+    tok = torch.tensor([seed_tok], device=device, dtype=torch.long)
     for _ in range(n_steps):
         lg = gen.decode_step(tok)
-        tok = lg.argmax(-1)
-        if tok.dim() == 0:
-            tok = tok.unsqueeze(0)
+        next_t = lg.argmax(-1, keepdim=True)
+        if next_t.dim() == 1:
+            next_t = next_t.unsqueeze(0)
+        tok = next_t.to(device)
     return (time.perf_counter() - t0) / n_steps * 1000
 
 
@@ -108,29 +130,32 @@ def run_scaling_proof(
     long_len: int,
     decode_steps: int,
 ) -> dict:
+    max_ctx = 2048
+    long_len = min(long_len, max_ctx - decode_steps)
+    short_len = min(short_len, max_ctx - decode_steps)
     text = "Scientific discovery advances through careful observation and experiment. "
-    short_ids = make_chunk(tokenizer, short_len, text, max_len=2048).to(device)
-    long_ids = make_chunk(tokenizer, long_len, text, max_len=2048).to(device)
+    short_ids = make_chunk(tokenizer, short_len, text, max_len=max_ctx).to(device)
+    long_ids = make_chunk(tokenizer, long_len, text, max_len=max_ctx).to(device)
 
     base_gen = BaseKVGenerator(base)
     _free(device)
     _reset_peak(device)
     base_gen.prefill(short_ids)
-    base_short = measure_decode_ms(base_gen, decode_steps)
+    base_short = measure_decode_ms(base_gen, decode_steps, device)
 
     _free(device)
     _reset_peak(device)
     base_gen.prefill(long_ids)
-    base_long = measure_decode_ms(base_gen, decode_steps)
+    base_long = measure_decode_ms(base_gen, decode_steps, device)
     base_ratio = base_long / max(base_short, 1e-6)
 
     kvfree.prefill(short_ids)
-    kv_short = measure_decode_ms(kvfree, decode_steps)
+    kv_short = measure_decode_ms(kvfree, decode_steps, device)
 
     _free(device)
     _reset_peak(device)
     kvfree.prefill(long_ids)
-    kv_long = measure_decode_ms(kvfree, decode_steps)
+    kv_long = measure_decode_ms(kvfree, decode_steps, device)
     kv_ratio = kv_long / max(kv_short, 1e-6)
 
     return {
@@ -153,8 +178,8 @@ def _feed_and_reply(gen, chunk: torch.Tensor, device: torch.device, reply_tokens
     tok = torch.tensor([1], device=device)
     for _ in range(reply_tokens):
         lg = gen.decode_step(tok)
-        tok = lg.argmax(-1)
-        if tok.dim() == 0:
+        tok = lg.argmax(-1, keepdim=True).to(device)
+        if tok.dim() == 1:
             tok = tok.unsqueeze(0)
 
 
@@ -180,14 +205,14 @@ def run_multiturn_proof(
     base_gen = BaseKVGenerator(base)
 
     for turn in range(1, n_turns + 1):
-        chunk = make_chunk(tokenizer, chunk_tokens, seed + str(turn))
-        chunk = chunk[:, :chunk_tokens].to(device)
+        chunk = make_chunk(tokenizer, chunk_tokens, seed + str(turn), max_len=2048)
+        chunk = chunk.to(device)
         first = turn == 1
 
         _reset_peak(device)
         _feed_and_reply(base_gen, chunk, device, reply_tokens, first)
         base_kv_len = kv_seq_len(base_gen._past_key_values)
-        base_dec = measure_decode_ms(base_gen, 8)
+        base_dec = measure_decode_ms(base_gen, 8, device)
         base_theory_kv_mb = estimate_kv_cache_bytes(base_kv_len, n_layers, H, dtype_bytes=2) / 1e6
         base_peak = _peak_mb(device)
 
@@ -195,7 +220,7 @@ def run_multiturn_proof(
         _feed_and_reply(kvfree, chunk, device, reply_tokens, first)
         cache = kvfree._cache
         kv_early_len = kv_seq_len(cache.early_past)
-        kv_dec = measure_decode_ms(kvfree, 8)
+        kv_dec = measure_decode_ms(kvfree, 8, device)
         kv_theory_mb = (
             estimate_early_kv_bytes(kv_early_len, n_early, H, dtype_bytes=2)
             + estimate_bulk_tail_bytes(n_swap, H, d_bulk=d_bulk)
@@ -342,8 +367,8 @@ def main() -> None:
     device = pick_device(args.device)
     dtype = pick_dtype(device, train=False)
     max_ctx = 2048
-    args.long_len = min(args.long_len, max_ctx)
-    args.short_len = min(args.short_len, max_ctx)
+    args.long_len = min(args.long_len, max_ctx - args.decode_steps)
+    args.short_len = min(args.short_len, max_ctx - args.decode_steps)
 
     print("=" * 72)
     print(f"KVFree Avantaj Kanıtı | {device_summary(device)}")
@@ -364,12 +389,14 @@ def main() -> None:
         compact=True,
         d_bulk=args.d_bulk,
     ).to(device)
-    ckpt = Path(args.swap_checkpoint)
+    ckpt = resolve_swap_checkpoint(args.swap_checkpoint)
     if ckpt.exists():
         load_bulk_swap_checkpoint(kvfree, str(ckpt), device)
         print(f"Checkpoint: {ckpt}")
     else:
-        print(f"⚠ Checkpoint yok ({ckpt}) — rastgele bulk ağırlık")
+        print(f"⚠ Checkpoint yok ({args.swap_checkpoint})")
+        print("  Colab: !cp /content/drive/MyDrive/infiti/bulk_v2.pt checkpoints/bulk_swap/")
+        print("  veya --swap-checkpoint /content/drive/MyDrive/infiti/bulk_v2.pt")
 
     print("\n[1/3] Decode ölçekleme (512 vs 2048)...")
     scaling = run_scaling_proof(
