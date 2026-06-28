@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "device": "cpu",
+    "epochs": 5,
+    "subset": 5000
+  },
+  "autorank_linear": {
+    "linear_params": 200960,
+    "autorank_params": 33536,
+    "savings_pct": 83.31,
+    "svd_recon_error": 0.043635,
+    "mlp_standard_params": 269322,
+    "mlp_autorank_params": 51250,
+    "mlp_savings_pct": 80.97,
+    "svd_acc_before": 0.906,
+    "svd_acc_after": 0.716,
+    "train_std_acc": 0.911,
+    "train_ar_acc": 0.851,
+    "train_std_time_sec": 1.08,
+    "train_ar_time_sec": 1.01
+  },
+  "plateau_detector": {
+    "synthetic_stop_epoch": 11,
+    "synthetic_expected": 8,
+    "mnist_epochs_run": 15,
+    "mnist_max_epochs": 15,
+    "mnist_acc": 0.938,
+    "mnist_time_sec": 3.67,
+    "baseline_epochs": 15,
+    "baseline_acc": 0.933
+  },
+  "adaptive_precision": {
+    "fp16_step": 700,
+    "int8_step": 900,
+    "mode_at_50pct": "fp32",
+    "mode_at_75pct": "fp16",
+    "mode_at_95pct": "int8",
+    "mnist_acc_fp32_only": 0.906,
+    "mnist_acc_with_schedule": 0.91,
+    "deferred_transition": true
+  }
+}

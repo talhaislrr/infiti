@@ -1,0 +1,71 @@
+{
+  "device": "cpu",
+  "memory_comparison": [
+    {
+      "seq_len": 512,
+      "bulk_bytes": 3072,
+      "bulk_kb": 3.0,
+      "kv_bytes": 1048576,
+      "kv_mb": 1.0486,
+      "ratio": 341.3
+    },
+    {
+      "seq_len": 4096,
+      "bulk_bytes": 3072,
+      "bulk_kb": 3.0,
+      "kv_bytes": 8388608,
+      "kv_mb": 8.3886,
+      "ratio": 2730.7
+    },
+    {
+      "seq_len": 16384,
+      "bulk_bytes": 3072,
+      "bulk_kb": 3.0,
+      "kv_bytes": 33554432,
+      "kv_mb": 33.5544,
+      "ratio": 10922.7
+    }
+  ],
+  "adaptive_ablation": {
+    "stride8": {
+      "recall": 0.0267,
+      "params": 1624832,
+      "train_sec": 11.7,
+      "trigger_stride": 8,
+      "adaptive_trigger": false
+    },
+    "stride4": {
+      "recall": 0.0133,
+      "params": 1624832,
+      "train_sec": 17.7,
+      "trigger_stride": 4,
+      "adaptive_trigger": false
+    },
+    "adaptive": {
+      "recall": 0.02,
+      "params": 1624832,
+      "train_sec": 57.1,
+      "trigger_stride": 8,
+      "adaptive_trigger": true,
+      "surprise_threshold": 0.5
+    }
+  },
+  "latency_v2": [
+    {
+      "seq_len": 64,
+      "ms_per_tok": 1.0,
+      "bulk_mem_kb": 4.0
+    },
+    {
+      "seq_len": 256,
+      "ms_per_tok": 1.001,
+      "bulk_mem_kb": 4.0
+    },
+    {
+      "seq_len": 512,
+      "ms_per_tok": 0.989,
+      "bulk_mem_kb": 4.0
+    }
+  ],
+  "o1_verified": true
+}

@@ -1,0 +1,122 @@
+{
+  "device": "cpu",
+  "vocab": 32,
+  "d_model": 128,
+  "gap": 48,
+  "epochs": 15,
+  "params": {
+    "standard": 667136,
+    "v1": 1264128,
+    "v2": 1624832
+  },
+  "pattern": {
+    "standard": {
+      "acc": 0.8748,
+      "train_sec": 2.2
+    },
+    "v1": {
+      "acc": 0.873,
+      "train_sec": 17.3
+    },
+    "v2": {
+      "acc": 0.6674,
+      "train_sec": 8.6
+    }
+  },
+  "long_range": {
+    "standard": {
+      "recall_acc": 0.0867,
+      "full_acc": 0.0314,
+      "train_sec": 4.1
+    },
+    "v1": {
+      "recall_acc": 0.02,
+      "full_acc": 0.0317,
+      "train_sec": 36.5
+    },
+    "v2": {
+      "recall_acc": 0.02,
+      "full_acc": 0.0307,
+      "train_sec": 21.3
+    }
+  },
+  "latency": {
+    "standard": [
+      {
+        "seq_len": 32,
+        "ms_per_tok": 0.92,
+        "kv_mb": 0.0655
+      },
+      {
+        "seq_len": 64,
+        "ms_per_tok": 1.33,
+        "kv_mb": 0.1311
+      },
+      {
+        "seq_len": 128,
+        "ms_per_tok": 2.386,
+        "kv_mb": 0.2621
+      },
+      {
+        "seq_len": 256,
+        "ms_per_tok": 4.662,
+        "kv_mb": 0.5243
+      },
+      {
+        "seq_len": 512,
+        "ms_per_tok": 9.863,
+        "kv_mb": 1.0486
+      }
+    ],
+    "v1": [
+      {
+        "seq_len": 32,
+        "ms_per_tok": 1.297
+      },
+      {
+        "seq_len": 64,
+        "ms_per_tok": 1.276
+      },
+      {
+        "seq_len": 128,
+        "ms_per_tok": 1.268
+      },
+      {
+        "seq_len": 256,
+        "ms_per_tok": 1.281
+      },
+      {
+        "seq_len": 512,
+        "ms_per_tok": 1.373
+      }
+    ],
+    "v2": [
+      {
+        "seq_len": 32,
+        "ms_per_tok": 0.919,
+        "bulk_mem_kb": 4.0
+      },
+      {
+        "seq_len": 64,
+        "ms_per_tok": 0.929,
+        "bulk_mem_kb": 4.0
+      },
+      {
+        "seq_len": 128,
+        "ms_per_tok": 0.929,
+        "bulk_mem_kb": 4.0
+      },
+      {
+        "seq_len": 256,
+        "ms_per_tok": 0.921,
+        "bulk_mem_kb": 4.0
+      },
+      {
+        "seq_len": 512,
+        "ms_per_tok": 0.928,
+        "bulk_mem_kb": 4.0
+      }
+    ]
+  },
+  "speedup_v2_vs_std_at_512": 10.63
+}

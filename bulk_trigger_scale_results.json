@@ -1,0 +1,10 @@
+{
+  "device": "cpu",
+  "wikitext_v2": {
+    "vocab_size": 123,
+    "d_model": 256,
+    "params": 6714880,
+    "perplexity": 11.92,
+    "train_sec": 22.1
+  }
+}

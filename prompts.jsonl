@@ -1,0 +1,20 @@
+{"id": "math_01", "prompt": "What is 17 + 28? Answer with only the number.", "gold": "45", "match": "numeric"}
+{"id": "math_02", "prompt": "What is 144 divided by 12? Answer with only the number.", "gold": "12", "match": "numeric"}
+{"id": "math_03", "prompt": "What is 7 times 8? Reply with just the number.", "gold": "56", "match": "numeric"}
+{"id": "math_04", "prompt": "What is 100 minus 37? Only the number.", "gold": "63", "match": "numeric"}
+{"id": "math_05", "prompt": "What is the square root of 81? Number only.", "gold": "9", "match": "numeric"}
+{"id": "fact_01", "prompt": "What is the capital of France? One word answer.", "gold": "Paris", "match": "contains"}
+{"id": "fact_02", "prompt": "What is the capital of Turkey? One word.", "gold": "Ankara", "match": "contains"}
+{"id": "fact_03", "prompt": "What planet is known as the Red Planet? One word.", "gold": "Mars", "match": "contains"}
+{"id": "fact_04", "prompt": "How many continents are there? Number only.", "gold": "7", "match": "numeric"}
+{"id": "fact_05", "prompt": "What is the chemical symbol for gold? Letters only.", "gold": "Au", "match": "contains"}
+{"id": "logic_01", "prompt": "If all cats are animals and Felix is a cat, is Felix an animal? Answer yes or no.", "gold": "yes", "match": "contains"}
+{"id": "logic_02", "prompt": "Is water wet? Answer yes or no only.", "gold": "yes", "match": "contains"}
+{"id": "logic_03", "prompt": "Can a triangle have four sides? Answer yes or no.", "gold": "no", "match": "contains"}
+{"id": "tr_01", "prompt": "Türkiye'nin başkenti neresidir? Tek kelime.", "gold": "Ankara", "match": "contains"}
+{"id": "tr_02", "prompt": "2 artı 2 kaç eder? Sadece sayı.", "gold": "4", "match": "numeric"}
+{"id": "tr_03", "prompt": "Dünyanın en büyük okyanusu hangisidir? Tek kelime.", "gold": "Pasifik", "match": "contains"}
+{"id": "code_01", "prompt": "In Python, what keyword defines a function? One word.", "gold": "def", "match": "contains"}
+{"id": "code_02", "prompt": "What does HTML stand for? Give the full expansion in lowercase.", "gold": "hypertext markup language", "match": "contains"}
+{"id": "code_03", "prompt": "How many bytes in a kilobyte (decimal, 1000 system)? Number only.", "gold": "1000", "match": "numeric"}
+{"id": "reason_01", "prompt": "A bat and ball cost $1.10 total. The bat costs $1 more than the ball. How many cents does the ball cost? Number only.", "gold": "5", "match": "numeric"}

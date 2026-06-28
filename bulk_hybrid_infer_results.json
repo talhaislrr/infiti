@@ -1,0 +1,55 @@
+{
+  "device": "mps",
+  "model": "/Users/talhaisler/ai_test/models/TinyLlama-1.1B-Chat-v1.0",
+  "adapter": "checkpoints/bulk_adapter/adapter.pt",
+  "prompt_tokens": 6,
+  "new_tokens": 8,
+  "benchmark": [
+    {
+      "prompt_len": 32,
+      "ms_recompute_per_tok": 33.8,
+      "base_prefill_ms": 29.2,
+      "base_decode_ms_per_tok": 10.25,
+      "bulk_prefill_ms": 118.62,
+      "bulk_decode_ms_per_tok": 7.98,
+      "bulk_slow_prefill_ms": 143.04,
+      "prefill_speedup": 1.21
+    },
+    {
+      "prompt_len": 128,
+      "ms_recompute_per_tok": 58.94,
+      "base_prefill_ms": 65.84,
+      "base_decode_ms_per_tok": 24.49,
+      "bulk_prefill_ms": 103.33,
+      "bulk_decode_ms_per_tok": 28.09,
+      "bulk_slow_prefill_ms": 311.39,
+      "prefill_speedup": 3.01
+    },
+    {
+      "prompt_len": 512,
+      "ms_recompute_per_tok": 194.55,
+      "base_prefill_ms": 223.08,
+      "base_decode_ms_per_tok": 59.04,
+      "bulk_prefill_ms": 557.53,
+      "bulk_decode_ms_per_tok": 28.47,
+      "bulk_slow_prefill_ms": 1599.98,
+      "prefill_speedup": 2.87
+    },
+    {
+      "prompt_len": 1024,
+      "ms_recompute_per_tok": 423.06,
+      "base_prefill_ms": 484.02,
+      "base_decode_ms_per_tok": 82.29,
+      "bulk_prefill_ms": 1099.37,
+      "bulk_decode_ms_per_tok": 45.48,
+      "bulk_slow_prefill_ms": null,
+      "prefill_speedup": null
+    }
+  ],
+  "memory": {
+    "bulk_state_kb": 24.0,
+    "kv_at_max_prompt_mb": 369.099
+  },
+  "base_decode_o1": false,
+  "bulk_decode_o1": false
+}

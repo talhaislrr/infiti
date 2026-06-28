@@ -1,0 +1,54 @@
+{
+  "vocab_size": 16,
+  "d_model": 128,
+  "standard_params": 466432,
+  "bulk_params": 863488,
+  "standard_acc": 0.8147,
+  "bulk_acc": 1.0,
+  "standard_train_sec": 3.75,
+  "bulk_train_sec": 11.55,
+  "latency": [
+    {
+      "seq_len": 16,
+      "standard_ms": 0.588,
+      "bulk_ms": 0.629,
+      "speedup": 0.94,
+      "kv_cache_mb": 0.053,
+      "bulk_window_kb": 2.0
+    },
+    {
+      "seq_len": 32,
+      "standard_ms": 0.653,
+      "bulk_ms": 0.618,
+      "speedup": 1.06,
+      "kv_cache_mb": 0.086,
+      "bulk_window_kb": 2.0
+    },
+    {
+      "seq_len": 64,
+      "standard_ms": 0.802,
+      "bulk_ms": 0.633,
+      "speedup": 1.27,
+      "kv_cache_mb": 0.152,
+      "bulk_window_kb": 2.0
+    },
+    {
+      "seq_len": 128,
+      "standard_ms": 1.055,
+      "bulk_ms": 0.626,
+      "speedup": 1.68,
+      "kv_cache_mb": 0.283,
+      "bulk_window_kb": 2.0
+    },
+    {
+      "seq_len": 256,
+      "standard_ms": 1.7,
+      "bulk_ms": 0.623,
+      "speedup": 2.73,
+      "kv_cache_mb": 0.545,
+      "bulk_window_kb": 2.0
+    }
+  ],
+  "o1_verified": true,
+  "memory_ratio_at_max_len": 279.0
+}

@@ -1,0 +1,30 @@
+{"instruction": "What is 17 + 28?", "output": "45"}
+{"instruction": "What is 144 divided by 12?", "output": "12"}
+{"instruction": "What is 7 times 8?", "output": "56"}
+{"instruction": "What is 100 minus 37?", "output": "63"}
+{"instruction": "What is the square root of 81?", "output": "9"}
+{"instruction": "What is the capital of France?", "output": "Paris"}
+{"instruction": "What is the capital of Turkey?", "output": "Ankara"}
+{"instruction": "What planet is known as the Red Planet?", "output": "Mars"}
+{"instruction": "How many continents are there?", "output": "7"}
+{"instruction": "What is the chemical symbol for gold?", "output": "Au"}
+{"instruction": "If all cats are animals and Felix is a cat, is Felix an animal?", "output": "Yes"}
+{"instruction": "Is water wet?", "output": "Yes"}
+{"instruction": "Can a triangle have four sides?", "output": "No"}
+{"instruction": "Türkiye'nin başkenti neresidir?", "output": "Ankara"}
+{"instruction": "2 artı 2 kaç eder?", "output": "4"}
+{"instruction": "Dünyanın en büyük okyanusu hangisidir?", "output": "Pasifik"}
+{"instruction": "In Python, what keyword defines a function?", "output": "def"}
+{"instruction": "What does HTML stand for?", "output": "HyperText Markup Language"}
+{"instruction": "How many bytes in a kilobyte?", "output": "1000"}
+{"instruction": "A bat and ball cost $1.10. The bat costs $1 more than the ball. Ball cost in cents?", "output": "5"}
+{"instruction": "What is 25 + 25?", "output": "50"}
+{"instruction": "What is 9 squared?", "output": "81"}
+{"instruction": "Capital of Japan?", "output": "Tokyo"}
+{"instruction": "Capital of Germany?", "output": "Berlin"}
+{"instruction": "Largest mammal?", "output": "Blue whale"}
+{"instruction": "Speed of light approximate in km/s? Round to 300000.", "output": "300000"}
+{"instruction": "How many days in a leap year?", "output": "366"}
+{"instruction": "What is 15 percent of 200?", "output": "30"}
+{"instruction": "Chemical formula for water?", "output": "H2O"}
+{"instruction": "Who wrote Romeo and Juliet?", "output": "Shakespeare"}

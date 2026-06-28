@@ -1,0 +1,1343 @@
+{
+  "meta": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "device": "cpu",
+    "modes": [
+      "base",
+      "baseline_r32",
+      "hfp_stiff_r32",
+      "baseline_r64",
+      "hfp_stiff_r64",
+      "baseline_r128",
+      "hfp_stiff_r128"
+    ],
+    "scoring": "numeric_first_token"
+  },
+  "summaries": [
+    {
+      "mode": "base",
+      "n": 20,
+      "accuracy": 0.5,
+      "accuracy_pct": 50.0,
+      "avg_output_tokens": 13.65,
+      "avg_tokens_per_sec": 35.93,
+      "avg_latency_sec": 0.334
+    },
+    {
+      "mode": "baseline_r32",
+      "n": 20,
+      "accuracy": 0.95,
+      "accuracy_pct": 95.0,
+      "avg_output_tokens": 5.8,
+      "avg_tokens_per_sec": 23.73,
+      "avg_latency_sec": 0.208
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "n": 20,
+      "accuracy": 0.95,
+      "accuracy_pct": 95.0,
+      "avg_output_tokens": 3.15,
+      "avg_tokens_per_sec": 22.64,
+      "avg_latency_sec": 0.135
+    },
+    {
+      "mode": "baseline_r64",
+      "n": 20,
+      "accuracy": 1.0,
+      "accuracy_pct": 100.0,
+      "avg_output_tokens": 14.8,
+      "avg_tokens_per_sec": 27.27,
+      "avg_latency_sec": 0.451
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "n": 20,
+      "accuracy": 0.9,
+      "accuracy_pct": 90.0,
+      "avg_output_tokens": 6.45,
+      "avg_tokens_per_sec": 23.5,
+      "avg_latency_sec": 0.229
+    },
+    {
+      "mode": "baseline_r128",
+      "n": 20,
+      "accuracy": 0.95,
+      "accuracy_pct": 95.0,
+      "avg_output_tokens": 32,
+      "avg_tokens_per_sec": 34.16,
+      "avg_latency_sec": 0.938
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "n": 20,
+      "accuracy": 0.95,
+      "accuracy_pct": 95.0,
+      "avg_output_tokens": 32,
+      "avg_tokens_per_sec": 34.37,
+      "avg_latency_sec": 0.931
+    }
+  ],
+  "records": [
+    {
+      "mode": "base",
+      "prompt_id": "math_01",
+      "response": "45",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.168,
+      "tokens_per_sec": 17.88
+    },
+    {
+      "mode": "base",
+      "prompt_id": "math_02",
+      "response": "12",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.107,
+      "tokens_per_sec": 27.98
+    },
+    {
+      "mode": "base",
+      "prompt_id": "math_03",
+      "response": "64",
+      "correct": false,
+      "output_tokens": 3,
+      "latency_sec": 0.106,
+      "tokens_per_sec": 28.17
+    },
+    {
+      "mode": "base",
+      "prompt_id": "math_04",
+      "response": "The result of subtracting 37 from 100 is:",
+      "correct": false,
+      "output_tokens": 32,
+      "latency_sec": 0.723,
+      "tokens_per_sec": 44.28
+    },
+    {
+      "mode": "base",
+      "prompt_id": "math_05",
+      "response": "The square root of 81 is 9.",
+      "correct": false,
+      "output_tokens": 12,
+      "latency_sec": 0.295,
+      "tokens_per_sec": 40.74
+    },
+    {
+      "mode": "base",
+      "prompt_id": "fact_01",
+      "response": "Paris",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.084,
+      "tokens_per_sec": 23.71
+    },
+    {
+      "mode": "base",
+      "prompt_id": "fact_02",
+      "response": "Ankara",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.125,
+      "tokens_per_sec": 31.97
+    },
+    {
+      "mode": "base",
+      "prompt_id": "fact_03",
+      "response": "Mars",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.109,
+      "tokens_per_sec": 27.54
+    },
+    {
+      "mode": "base",
+      "prompt_id": "fact_04",
+      "response": "There are 5 continents: Asia, Africa, North America, South America, and Europe.",
+      "correct": false,
+      "output_tokens": 20,
+      "latency_sec": 0.466,
+      "tokens_per_sec": 42.93
+    },
+    {
+      "mode": "base",
+      "prompt_id": "fact_05",
+      "response": "Au",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.084,
+      "tokens_per_sec": 23.8
+    },
+    {
+      "mode": "base",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.107,
+      "tokens_per_sec": 27.92
+    },
+    {
+      "mode": "base",
+      "prompt_id": "logic_02",
+      "response": "Yes. Water is a liquid substance that can be wet.",
+      "correct": true,
+      "output_tokens": 13,
+      "latency_sec": 0.315,
+      "tokens_per_sec": 41.26
+    },
+    {
+      "mode": "base",
+      "prompt_id": "logic_03",
+      "response": "Yes. A triangle is defined as a polygon with three sides and three vertices. Therefore, it is possible for a triangle to have four sides.",
+      "correct": false,
+      "output_tokens": 30,
+      "latency_sec": 0.673,
+      "tokens_per_sec": 44.58
+    },
+    {
+      "mode": "base",
+      "prompt_id": "tr_01",
+      "response": "Türkiye'nin başkenti İstanbul'dur.",
+      "correct": false,
+      "output_tokens": 11,
+      "latency_sec": 0.27,
+      "tokens_per_sec": 40.74
+    },
+    {
+      "mode": "base",
+      "prompt_id": "tr_02",
+      "response": "2 artan 2 kaçtır?",
+      "correct": false,
+      "output_tokens": 32,
+      "latency_sec": 0.712,
+      "tokens_per_sec": 44.92
+    },
+    {
+      "mode": "base",
+      "prompt_id": "tr_03",
+      "response": "Dünya'nın en büyük okyanusu, Kuzey Amerika'daki Kuzey Okyanusu'nda olan Kuzey Okyan",
+      "correct": false,
+      "output_tokens": 32,
+      "latency_sec": 0.723,
+      "tokens_per_sec": 44.24
+    },
+    {
+      "mode": "base",
+      "prompt_id": "code_01",
+      "response": "The keyword in Python that defines a function is `def`.",
+      "correct": true,
+      "output_tokens": 13,
+      "latency_sec": 0.313,
+      "tokens_per_sec": 41.56
+    },
+    {
+      "mode": "base",
+      "prompt_id": "code_02",
+      "response": "HTML stands for HyperText Markup Language.",
+      "correct": true,
+      "output_tokens": 9,
+      "latency_sec": 0.23,
+      "tokens_per_sec": 39.11
+    },
+    {
+      "mode": "base",
+      "prompt_id": "code_03",
+      "response": "There are 8 bytes in a kilobyte (decimal).",
+      "correct": false,
+      "output_tokens": 14,
+      "latency_sec": 0.342,
+      "tokens_per_sec": 40.99
+    },
+    {
+      "mode": "base",
+      "prompt_id": "reason_01",
+      "response": "To determine the cost of the ball in cents, we start by defining the variables for the cost of the bat and the ball. Let's denote the cost of",
+      "correct": false,
+      "output_tokens": 32,
+      "latency_sec": 0.723,
+      "tokens_per_sec": 44.27
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "math_01",
+      "response": "45",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.157,
+      "tokens_per_sec": 19.06
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "math_02",
+      "response": "12",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.135,
+      "tokens_per_sec": 22.16
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "math_03",
+      "response": "56",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.135,
+      "tokens_per_sec": 22.23
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "math_04",
+      "response": "63",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.135,
+      "tokens_per_sec": 22.29
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "math_05",
+      "response": "9",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.108,
+      "tokens_per_sec": 18.57
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "fact_01",
+      "response": "Paris",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.108,
+      "tokens_per_sec": 18.58
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "fact_02",
+      "response": "Ankara",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.157,
+      "tokens_per_sec": 25.55
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "fact_03",
+      "response": "Mars",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.129,
+      "tokens_per_sec": 23.26
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "fact_04",
+      "response": "7 continents: Africa, Asia, Australia, Antarctica, America, Europe, and Africa.",
+      "correct": true,
+      "output_tokens": 19,
+      "latency_sec": 0.558,
+      "tokens_per_sec": 34.02
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "fact_05",
+      "response": "Au",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.111,
+      "tokens_per_sec": 17.98
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.142,
+      "tokens_per_sec": 21.11
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "logic_02",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.141,
+      "tokens_per_sec": 21.3
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "logic_03",
+      "response": "No.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.141,
+      "tokens_per_sec": 21.27
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "tr_01",
+      "response": "Ankara okyanusu okyanusu okyanusu okyanusu okyanusu okyanusu okyanusu okyanusu okyanusu okyan",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.872,
+      "tokens_per_sec": 36.7
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "tr_02",
+      "response": "4",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.105,
+      "tokens_per_sec": 19.0
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "tr_03",
+      "response": "Pasifik Karağı.",
+      "correct": true,
+      "output_tokens": 6,
+      "latency_sec": 0.205,
+      "tokens_per_sec": 29.33
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "code_01",
+      "response": "def",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.102,
+      "tokens_per_sec": 19.69
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "code_02",
+      "response": "HyperText Markup Language",
+      "correct": true,
+      "output_tokens": 5,
+      "latency_sec": 0.208,
+      "tokens_per_sec": 24.09
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "code_03",
+      "response": "1000 bytes in a kilobyte.",
+      "correct": true,
+      "output_tokens": 12,
+      "latency_sec": 0.36,
+      "tokens_per_sec": 33.31
+    },
+    {
+      "mode": "baseline_r32",
+      "prompt_id": "reason_01",
+      "response": "50 cents",
+      "correct": false,
+      "output_tokens": 4,
+      "latency_sec": 0.159,
+      "tokens_per_sec": 25.19
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "math_01",
+      "response": "45",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.156,
+      "tokens_per_sec": 19.29
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "math_02",
+      "response": "5",
+      "correct": false,
+      "output_tokens": 2,
+      "latency_sec": 0.105,
+      "tokens_per_sec": 19.02
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "math_03",
+      "response": "56",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.129,
+      "tokens_per_sec": 23.26
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "math_04",
+      "response": "63",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.129,
+      "tokens_per_sec": 23.22
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "math_05",
+      "response": "9",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.102,
+      "tokens_per_sec": 19.66
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "fact_01",
+      "response": "Paris",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.102,
+      "tokens_per_sec": 19.64
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "fact_02",
+      "response": "Ankara",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.154,
+      "tokens_per_sec": 25.94
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "fact_03",
+      "response": "Mars",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.128,
+      "tokens_per_sec": 23.42
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "fact_04",
+      "response": "7.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.129,
+      "tokens_per_sec": 23.24
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "fact_05",
+      "response": "Au",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.103,
+      "tokens_per_sec": 19.35
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.133,
+      "tokens_per_sec": 22.52
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "logic_02",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.132,
+      "tokens_per_sec": 22.67
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "logic_03",
+      "response": "No.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.13,
+      "tokens_per_sec": 23.11
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "tr_01",
+      "response": "Ankara",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.155,
+      "tokens_per_sec": 25.73
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "tr_02",
+      "response": "4",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.105,
+      "tokens_per_sec": 19.04
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "tr_03",
+      "response": "Pasifik Karayana",
+      "correct": true,
+      "output_tokens": 6,
+      "latency_sec": 0.206,
+      "tokens_per_sec": 29.16
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "code_01",
+      "response": "def",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.103,
+      "tokens_per_sec": 19.49
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "code_02",
+      "response": "HyperText Markup Language",
+      "correct": true,
+      "output_tokens": 5,
+      "latency_sec": 0.178,
+      "tokens_per_sec": 28.05
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "code_03",
+      "response": "1000",
+      "correct": true,
+      "output_tokens": 6,
+      "latency_sec": 0.209,
+      "tokens_per_sec": 28.65
+    },
+    {
+      "mode": "hfp_stiff_r32",
+      "prompt_id": "reason_01",
+      "response": "5",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.109,
+      "tokens_per_sec": 18.34
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "math_01",
+      "response": "45",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.227,
+      "tokens_per_sec": 17.62
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "math_02",
+      "response": "12",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.165,
+      "tokens_per_sec": 24.28
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "math_03",
+      "response": "56",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.139,
+      "tokens_per_sec": 21.59
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "math_04",
+      "response": "63",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.139,
+      "tokens_per_sec": 21.58
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "math_05",
+      "response": "9",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.11,
+      "tokens_per_sec": 18.13
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "fact_01",
+      "response": "Paris",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.11,
+      "tokens_per_sec": 18.22
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "fact_02",
+      "response": "Ankara",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.164,
+      "tokens_per_sec": 24.37
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "fact_03",
+      "response": "Mars",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.138,
+      "tokens_per_sec": 21.7
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "fact_04",
+      "response": "7.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.895,
+      "tokens_per_sec": 35.76
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "fact_05",
+      "response": "Au",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.892,
+      "tokens_per_sec": 35.88
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.906,
+      "tokens_per_sec": 35.34
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "logic_02",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.898,
+      "tokens_per_sec": 35.63
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "logic_03",
+      "response": "No.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.896,
+      "tokens_per_sec": 35.73
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "tr_01",
+      "response": "Ankara.",
+      "correct": true,
+      "output_tokens": 5,
+      "latency_sec": 0.189,
+      "tokens_per_sec": 26.5
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "tr_02",
+      "response": "4",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.109,
+      "tokens_per_sec": 18.29
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "tr_03",
+      "response": "Pasifik okyanusu hangisidir?",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.899,
+      "tokens_per_sec": 35.58
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "code_01",
+      "response": "def",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.136,
+      "tokens_per_sec": 22.06
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "code_02",
+      "response": "HyperText Markup Language",
+      "correct": true,
+      "output_tokens": 5,
+      "latency_sec": 0.189,
+      "tokens_per_sec": 26.47
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "code_03",
+      "response": "1000",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.903,
+      "tokens_per_sec": 35.44
+    },
+    {
+      "mode": "baseline_r64",
+      "prompt_id": "reason_01",
+      "response": "5",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.907,
+      "tokens_per_sec": 35.29
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "math_01",
+      "response": "45",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.172,
+      "tokens_per_sec": 17.41
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "math_02",
+      "response": "12.000000",
+      "correct": false,
+      "output_tokens": 10,
+      "latency_sec": 0.327,
+      "tokens_per_sec": 30.53
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "math_03",
+      "response": "56",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.137,
+      "tokens_per_sec": 21.95
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "math_04",
+      "response": "63",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.137,
+      "tokens_per_sec": 21.87
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "math_05",
+      "response": "9",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.108,
+      "tokens_per_sec": 18.46
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "fact_01",
+      "response": "Paris",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.109,
+      "tokens_per_sec": 18.43
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "fact_02",
+      "response": "Ankara",
+      "correct": true,
+      "output_tokens": 4,
+      "latency_sec": 0.162,
+      "tokens_per_sec": 24.62
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "fact_03",
+      "response": "Mars",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.136,
+      "tokens_per_sec": 22.04
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "fact_04",
+      "response": "7.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.899,
+      "tokens_per_sec": 35.6
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "fact_05",
+      "response": "Au",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.11,
+      "tokens_per_sec": 18.23
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.141,
+      "tokens_per_sec": 21.26
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "logic_02",
+      "response": "Yes",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.109,
+      "tokens_per_sec": 18.31
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "logic_03",
+      "response": "No.",
+      "correct": true,
+      "output_tokens": 3,
+      "latency_sec": 0.137,
+      "tokens_per_sec": 21.92
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "tr_01",
+      "response": "Ankara.",
+      "correct": true,
+      "output_tokens": 5,
+      "latency_sec": 0.188,
+      "tokens_per_sec": 26.56
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "tr_02",
+      "response": "4",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.11,
+      "tokens_per_sec": 18.24
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "tr_03",
+      "response": "Pasifik Okyanusuusu",
+      "correct": true,
+      "output_tokens": 7,
+      "latency_sec": 0.245,
+      "tokens_per_sec": 28.53
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "code_01",
+      "response": "def",
+      "correct": true,
+      "output_tokens": 2,
+      "latency_sec": 0.107,
+      "tokens_per_sec": 18.67
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "code_02",
+      "response": "HyperText Markup Language",
+      "correct": true,
+      "output_tokens": 5,
+      "latency_sec": 0.185,
+      "tokens_per_sec": 27.03
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "code_03",
+      "response": "1000",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.886,
+      "tokens_per_sec": 36.12
+    },
+    {
+      "mode": "hfp_stiff_r64",
+      "prompt_id": "reason_01",
+      "response": "50 cents",
+      "correct": false,
+      "output_tokens": 4,
+      "latency_sec": 0.166,
+      "tokens_per_sec": 24.12
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "math_01",
+      "response": "45.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 1.029,
+      "tokens_per_sec": 31.1
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "math_02",
+      "response": "12.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 1.016,
+      "tokens_per_sec": 31.5
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "math_03",
+      "response": "56.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.972,
+      "tokens_per_sec": 32.91
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "math_04",
+      "response": "63.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.983,
+      "tokens_per_sec": 32.54
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "math_05",
+      "response": "9?",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.974,
+      "tokens_per_sec": 32.87
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "fact_01",
+      "response": "Paris.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.967,
+      "tokens_per_sec": 33.08
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "fact_02",
+      "response": "Ankara.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.922,
+      "tokens_per_sec": 34.72
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "fact_03",
+      "response": "Mars.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.925,
+      "tokens_per_sec": 34.6
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "fact_04",
+      "response": "7 continents.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.913,
+      "tokens_per_sec": 35.06
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "fact_05",
+      "response": "Au.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.928,
+      "tokens_per_sec": 34.49
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.942,
+      "tokens_per_sec": 33.98
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "logic_02",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.921,
+      "tokens_per_sec": 34.76
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "logic_03",
+      "response": "No.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.91,
+      "tokens_per_sec": 35.18
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "tr_01",
+      "response": "Ankara.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.909,
+      "tokens_per_sec": 35.22
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "tr_02",
+      "response": "4.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.908,
+      "tokens_per_sec": 35.24
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "tr_03",
+      "response": "Pasifikin en büyük okyanusu hangisidir?",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.907,
+      "tokens_per_sec": 35.26
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "code_01",
+      "response": "def.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.899,
+      "tokens_per_sec": 35.61
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "code_02",
+      "response": "HyperText Markup Language.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.9,
+      "tokens_per_sec": 35.54
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "code_03",
+      "response": "1000.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.918,
+      "tokens_per_sec": 34.86
+    },
+    {
+      "mode": "baseline_r128",
+      "prompt_id": "reason_01",
+      "response": "50 cents.",
+      "correct": false,
+      "output_tokens": 32,
+      "latency_sec": 0.923,
+      "tokens_per_sec": 34.67
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "math_01",
+      "response": "45",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.999,
+      "tokens_per_sec": 32.03
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "math_02",
+      "response": "128",
+      "correct": false,
+      "output_tokens": 32,
+      "latency_sec": 0.931,
+      "tokens_per_sec": 34.38
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "math_03",
+      "response": "56",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.924,
+      "tokens_per_sec": 34.62
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "math_04",
+      "response": "63",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.929,
+      "tokens_per_sec": 34.44
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "math_05",
+      "response": "9",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.94,
+      "tokens_per_sec": 34.04
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "fact_01",
+      "response": "Paris.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.917,
+      "tokens_per_sec": 34.89
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "fact_02",
+      "response": "Ankara.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.918,
+      "tokens_per_sec": 34.85
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "fact_03",
+      "response": "Mars.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.912,
+      "tokens_per_sec": 35.09
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "fact_04",
+      "response": "7.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.909,
+      "tokens_per_sec": 35.22
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "fact_05",
+      "response": "Au",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.916,
+      "tokens_per_sec": 34.92
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "logic_01",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.917,
+      "tokens_per_sec": 34.9
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "logic_02",
+      "response": "Yes.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.925,
+      "tokens_per_sec": 34.61
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "logic_03",
+      "response": "No.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.931,
+      "tokens_per_sec": 34.37
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "tr_01",
+      "response": "Ankara hangisidir?",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.944,
+      "tokens_per_sec": 33.9
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "tr_02",
+      "response": "4 kaç eder.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.942,
+      "tokens_per_sec": 33.97
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "tr_03",
+      "response": "Pasifikokyanusu hangisidir?",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.94,
+      "tokens_per_sec": 34.03
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "code_01",
+      "response": "def.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.931,
+      "tokens_per_sec": 34.37
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "code_02",
+      "response": "HyperText Markup Language.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.925,
+      "tokens_per_sec": 34.59
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "code_03",
+      "response": "1000",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.938,
+      "tokens_per_sec": 34.1
+    },
+    {
+      "mode": "hfp_stiff_r128",
+      "prompt_id": "reason_01",
+      "response": "5 cents.",
+      "correct": true,
+      "output_tokens": 32,
+      "latency_sec": 0.94,
+      "tokens_per_sec": 34.03
+    }
+  ]
+}

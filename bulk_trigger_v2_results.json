@@ -1,0 +1,77 @@
+{
+  "device": "cpu",
+  "gap": 48,
+  "params_v1": 1264128,
+  "params_v2": 1624832,
+  "v1_recall_acc": 0.055,
+  "v2_recall_acc": 0.19,
+  "v1_full_acc": 0.0319,
+  "v2_full_acc": 0.0339,
+  "v1_pattern_acc": 0.8743,
+  "v2_pattern_acc": 0.8357,
+  "latency_v1": [
+    {
+      "seq_len": 32,
+      "ms_per_tok": 1.008
+    },
+    {
+      "seq_len": 128,
+      "ms_per_tok": 1.024
+    },
+    {
+      "seq_len": 256,
+      "ms_per_tok": 1.031
+    },
+    {
+      "seq_len": 512,
+      "ms_per_tok": 1.095
+    }
+  ],
+  "latency_v2": [
+    {
+      "seq_len": 32,
+      "ms_per_tok": 0.723,
+      "bulk_mem_kb": 4.0
+    },
+    {
+      "seq_len": 128,
+      "ms_per_tok": 0.718,
+      "bulk_mem_kb": 4.0
+    },
+    {
+      "seq_len": 256,
+      "ms_per_tok": 0.733,
+      "bulk_mem_kb": 4.0
+    },
+    {
+      "seq_len": 512,
+      "ms_per_tok": 0.728,
+      "bulk_mem_kb": 4.0
+    }
+  ],
+  "latency_standard": [
+    {
+      "seq_len": 32,
+      "ms_per_tok": 1.008,
+      "kv_mb": 0.0655
+    },
+    {
+      "seq_len": 128,
+      "ms_per_tok": 2.56,
+      "kv_mb": 0.2621
+    },
+    {
+      "seq_len": 256,
+      "ms_per_tok": 4.705,
+      "kv_mb": 0.5243
+    },
+    {
+      "seq_len": 512,
+      "ms_per_tok": 9.912,
+      "kv_mb": 1.0486
+    }
+  ],
+  "o1_v2_verified": true,
+  "recall_winner": "v2",
+  "note": "v1 kausal cross-attn d\u00fczeltmesi uyguland\u0131 (pozisyon s\u0131z\u0131nt\u0131s\u0131 giderildi)"
+}

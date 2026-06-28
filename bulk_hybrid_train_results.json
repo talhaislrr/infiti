@@ -1,0 +1,17 @@
+{
+  "device": "mps",
+  "model": "/Users/talhaisler/ai_test/models/TinyLlama-1.1B-Chat-v1.0",
+  "adapter_params": 100724737,
+  "seq_len": 128,
+  "epochs": 1,
+  "trigger_stride": 4,
+  "adaptive_trigger": false,
+  "base_ppl": 10.279,
+  "bulk_ppl": 9.404,
+  "ppl_delta": -0.875,
+  "train_losses": [
+    3.0446
+  ],
+  "train_sec": 17.9,
+  "load_sec": 7.7
+}

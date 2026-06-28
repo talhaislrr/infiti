@@ -1,0 +1,47 @@
+{
+  "device": "mps",
+  "model": "/Users/talhaisler/ai_test/models/TinyLlama-1.1B-Chat-v1.0",
+  "compact": true,
+  "d_bulk": 256,
+  "n_swap": 4,
+  "sliding_window": 512,
+  "rows": [
+    {
+      "prompt_len": 512,
+      "recompute_ms_per_tok": 211.33,
+      "base": {
+        "prefill_ms": 227.17,
+        "decode_ms_per_tok": 61.34
+      },
+      "kvfree": {
+        "prefill_ms": 471.81,
+        "decode_ms_per_tok": 25.88
+      }
+    },
+    {
+      "prompt_len": 2048,
+      "recompute_ms_per_tok": 1007.53,
+      "base": {
+        "prefill_ms": 1147.49,
+        "decode_ms_per_tok": 173.37
+      },
+      "kvfree": {
+        "prefill_ms": 2242.8,
+        "decode_ms_per_tok": 35.42
+      }
+    }
+  ],
+  "memory": {
+    "full_kv_mb_at_max": 738.2,
+    "early_kv_mb_bounded": 75.5,
+    "bulk_tail_kb": 12.0,
+    "hybrid_bulk_kb": 24.0,
+    "kvfree_total_active_mb": 75.51
+  },
+  "scaling": {
+    "base": 0.593,
+    "kvfree": 0.287
+  },
+  "kvfree_decode_flat": true,
+  "kvfree_beats_base_at_max": true
+}

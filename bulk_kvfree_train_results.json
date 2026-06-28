@@ -1,0 +1,115 @@
+{
+  "model": "/Users/talhaisler/ai_test/models/TinyLlama-1.1B-Chat-v1.0",
+  "train_mode": "recall",
+  "compact": true,
+  "d_bulk": 256,
+  "swap_layers": 4,
+  "sliding_window": 512,
+  "swap_params": 12888068,
+  "seq_len": 256,
+  "epochs": 2,
+  "n_facts": null,
+  "base_ppl": 3.548,
+  "kvfree_ppl": 1.025,
+  "train_losses": [
+    0.6585,
+    0.047
+  ],
+  "train_sec": 348.4,
+  "recall_eval": {
+    "window_512": {
+      "hit_rate": 0.0,
+      "hits": 0,
+      "n": 8,
+      "cases": [
+        {
+          "fact": "Red Comet",
+          "answer": "Reference code:",
+          "hit": false
+        },
+        {
+          "fact": "Red Comet",
+          "answer": "Reference codexXx",
+          "hit": false
+        },
+        {
+          "fact": "Nebula Seven",
+          "answer": "Theatreatck the distant kingdom of the distant kingdom of the distant kingdom of the distant kingdom of the distant king",
+          "hit": false
+        },
+        {
+          "fact": "Omega Key",
+          "answer": "Reference codexXx",
+          "hit": false
+        },
+        {
+          "fact": "Iron Gate",
+          "answer": "Entertain the distant kingdom of the distant kingdom of the distant kingdom of the distant kingdom of the distant kingdo",
+          "hit": false
+        },
+        {
+          "fact": "Red Comet",
+          "answer": "Reference code:",
+          "hit": false
+        },
+        {
+          "fact": "Omega Key",
+          "answer": "Reference codexXx",
+          "hit": false
+        },
+        {
+          "fact": "Iron Gate",
+          "answer": "Theatreatime. . . . . . . . . . . . . . . . . . . .",
+          "hit": false
+        }
+      ]
+    },
+    "window_0": {
+      "hit_rate": 0.375,
+      "hits": 3,
+      "n": 8,
+      "cases": [
+        {
+          "fact": "Red Comet",
+          "answer": "Reference code: RED-COMET\n\n\nQuestion: What is the agent codename?\nAnswer:",
+          "hit": false
+        },
+        {
+          "fact": "Red Comet",
+          "answer": "Reference code: RED-COMET\n\nIn the distant kingdom of Aldoria, scholars debated",
+          "hit": false
+        },
+        {
+          "fact": "Nebula Seven",
+          "answer": "The agent codename is Nebula Seven.",
+          "hit": true
+        },
+        {
+          "fact": "Omega Key",
+          "answer": "Reference code: OMEGA-KEY\n\nIn the distant kingdom of Aldoria, scholars debated philosophy",
+          "hit": false
+        },
+        {
+          "fact": "Iron Gate",
+          "answer": "Enterprise-level encryption passphrase: Iron Gate",
+          "hit": true
+        },
+        {
+          "fact": "Red Comet",
+          "answer": "Reference code: RED-COMET\n\n\nQuestion: What is the agent codename?\nAnswer:",
+          "hit": false
+        },
+        {
+          "fact": "Omega Key",
+          "answer": "Reference code: OMEGA-KEY\n\nIn the distant kingdom of Aldoria, scholars debated philosophy",
+          "hit": false
+        },
+        {
+          "fact": "Iron Gate",
+          "answer": "The agent codename is Iron Gate.",
+          "hit": true
+        }
+      ]
+    }
+  }
+}

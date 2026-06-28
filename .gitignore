@@ -1,0 +1,22 @@
+# Model ağırlıkları (~2.2 GB) — download_tinyllama.py ile indir
+models/
+checkpoints/
+adapters/
+data/
+*.pt
+
+# HuggingFace cache (models/ altında)
+**/.cache/
+
+# Log / runtime
+*.log
+
+# Sonuç JSON'ları repo'da kalabilir (benchmark kanıtı)
+# bulk_*_results.json
+
+__pycache__/
+*.pyc
+.DS_Store
+.env
+.venv/
+venv/

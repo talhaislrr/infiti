@@ -1,0 +1,17 @@
+{
+  "bulk_rank": 128,
+  "bulk_reg_lambda": 0.0001,
+  "stiffness_p": 1.0,
+  "stiffness_threshold": 0.001,
+  "stiffness_k": 3,
+  "stiffness_min_epochs": 5,
+  "zenon_schedule_points": [0.7, 0.9],
+  "zenon_grad_threshold": 1e-05,
+  "initial_lr": 0.001,
+  "max_epochs": 30,
+  "use_bulk": true,
+  "use_stiff": true,
+  "use_zenon": false,
+  "measure_int8": false,
+  "early_stop": true
+}

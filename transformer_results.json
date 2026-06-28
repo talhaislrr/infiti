@@ -1,0 +1,123 @@
+{
+  "meta": {
+    "version": "hfp_v2"
+  },
+  "results": [
+    {
+      "label": "A) Standart Transformer FFN",
+      "params": 1305860,
+      "ffn_params": 131840,
+      "test_acc": {
+        "mean": 0.7272,
+        "std": 0.009
+      },
+      "elapsed_sec": {
+        "mean": 37.695,
+        "std": 0.502
+      },
+      "epochs": {
+        "mean": 15.0,
+        "std": 0.0
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.7208053691275168,
+          "epochs": 15
+        },
+        {
+          "seed": 43,
+          "test_acc": 0.7335570469798658,
+          "epochs": 15
+        }
+      ]
+    },
+    {
+      "label": "B) BulkLinear + generic stop",
+      "params": 1371396,
+      "ffn_params": 197376,
+      "test_acc": {
+        "mean": 0.7084,
+        "std": 0.0014
+      },
+      "elapsed_sec": {
+        "mean": 40.24,
+        "std": 0.4101
+      },
+      "epochs": {
+        "mean": 15.0,
+        "std": 0.0
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.7093959731543624,
+          "epochs": 15
+        },
+        {
+          "seed": 43,
+          "test_acc": 0.7073825503355705,
+          "epochs": 15
+        }
+      ]
+    },
+    {
+      "label": "C) BulkLinear + HFP Stiff (v2)",
+      "params": 1371396,
+      "ffn_params": 197376,
+      "test_acc": {
+        "mean": 0.7084,
+        "std": 0.0014
+      },
+      "elapsed_sec": {
+        "mean": 40.58,
+        "std": 0.2687
+      },
+      "epochs": {
+        "mean": 15.0,
+        "std": 0.0
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.7093959731543624,
+          "epochs": 15
+        },
+        {
+          "seed": 43,
+          "test_acc": 0.7073825503355705,
+          "epochs": 15
+        }
+      ]
+    },
+    {
+      "label": "D) BulkLinear + Stiff + Zenon (v2)",
+      "params": 1273092,
+      "ffn_params": 99072,
+      "test_acc": {
+        "mean": 0.6943,
+        "std": 0.0005
+      },
+      "elapsed_sec": {
+        "mean": 39.43,
+        "std": 0.3677
+      },
+      "epochs": {
+        "mean": 15.0,
+        "std": 0.0
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.6939597315436241,
+          "epochs": 15
+        },
+        {
+          "seed": 43,
+          "test_acc": 0.6946308724832215,
+          "epochs": 15
+        }
+      ]
+    }
+  ]
+}

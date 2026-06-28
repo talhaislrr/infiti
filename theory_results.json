@@ -1,0 +1,190 @@
+{
+  "meta": {
+    "eta_tilde": 0.407,
+    "theta_haar": 0.495,
+    "seeds": [
+      42
+    ]
+  },
+  "zeno_simulation": {
+    "zeno_table": [
+      {
+        "N": 10,
+        "standard_1_N2": 0.00010000000000000005,
+        "hfp_1_N": 0.0004070000000000001,
+        "ratio_hfp_over_std": 4.069999999999999,
+        "expected_ratio_approx": 4.069999999999999
+      },
+      {
+        "N": 100,
+        "standard_1_N2": 1.0000000000000002e-06,
+        "hfp_1_N": 4.070000000000001e-05,
+        "ratio_hfp_over_std": 40.7,
+        "expected_ratio_approx": 40.699999999999996
+      },
+      {
+        "N": 1000,
+        "standard_1_N2": 1.0000000000000002e-08,
+        "hfp_1_N": 4.070000000000001e-06,
+        "ratio_hfp_over_std": 407.0,
+        "expected_ratio_approx": 407.0
+      },
+      {
+        "N": 10000,
+        "standard_1_N2": 1.0000000000000002e-10,
+        "hfp_1_N": 4.070000000000001e-07,
+        "ratio_hfp_over_std": 4070.0,
+        "expected_ratio_approx": 4069.9999999999995
+      }
+    ],
+    "theta_0": 0.1,
+    "eta_tilde": 0.407
+  },
+  "results": [
+    {
+      "label": "A) Standart MLP (baseline)",
+      "mode": "A) Standart MLP (baseline)",
+      "params": 669706,
+      "rank": 128,
+      "test_acc": {
+        "mean": 0.9783,
+        "std": 0.0
+      },
+      "elapsed_sec": {
+        "mean": 27.25,
+        "std": 0.0
+      },
+      "epochs": {
+        "mean": 10.0,
+        "std": 0.0
+      },
+      "eta_tilde": 0.407,
+      "theta_haar_rad": 0.495,
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.9783,
+          "epochs": 10,
+          "elapsed_sec": 27.25,
+          "final_theta": 1.0
+        }
+      ]
+    },
+    {
+      "label": "B) Generic BulkLinear + generic stop",
+      "mode": "B) Generic BulkLinear + generic stop",
+      "params": 303214,
+      "rank": 128,
+      "test_acc": {
+        "mean": 0.977,
+        "std": 0.0
+      },
+      "elapsed_sec": {
+        "mean": 16.94,
+        "std": 0.0
+      },
+      "epochs": {
+        "mean": 5.0,
+        "std": 0.0
+      },
+      "eta_tilde": 0.407,
+      "theta_haar_rad": 0.495,
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.977,
+          "epochs": 5,
+          "elapsed_sec": 16.94,
+          "final_theta": 1.0
+        }
+      ]
+    },
+    {
+      "label": "C) HFP Teori: Haar Proj + Cubic Stiff",
+      "mode": "C) HFP Teori: Haar Proj + Cubic Stiff",
+      "params": 940682,
+      "rank": 115,
+      "test_acc": {
+        "mean": 0.9696,
+        "std": 0.0
+      },
+      "elapsed_sec": {
+        "mean": 13.76,
+        "std": 0.0
+      },
+      "epochs": {
+        "mean": 3.0,
+        "std": 0.0
+      },
+      "eta_tilde": 0.407,
+      "theta_haar_rad": 0.495,
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.9696,
+          "epochs": 3,
+          "elapsed_sec": 13.76,
+          "final_theta": 0.0
+        }
+      ]
+    },
+    {
+      "label": "D) HFP Teori: Tam stack + Zeno 1/N",
+      "mode": "D) HFP Teori: Tam stack + Zeno 1/N",
+      "params": 940682,
+      "rank": 115,
+      "test_acc": {
+        "mean": 0.9659,
+        "std": 0.0
+      },
+      "elapsed_sec": {
+        "mean": 13.9,
+        "std": 0.0
+      },
+      "epochs": {
+        "mean": 3.0,
+        "std": 0.0
+      },
+      "eta_tilde": 0.407,
+      "theta_haar_rad": 0.495,
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.9659,
+          "epochs": 3,
+          "elapsed_sec": 13.9,
+          "final_theta": 0.0
+        }
+      ]
+    },
+    {
+      "label": "E) LoRA-style (AI end\u00fcstri ref.)",
+      "mode": "E) LoRA-style (AI end\u00fcstri ref.)",
+      "params": 966666,
+      "rank": 128,
+      "test_acc": {
+        "mean": 0.9806,
+        "std": 0.0
+      },
+      "elapsed_sec": {
+        "mean": 34.26,
+        "std": 0.0
+      },
+      "epochs": {
+        "mean": 10.0,
+        "std": 0.0
+      },
+      "eta_tilde": 0.407,
+      "theta_haar_rad": 0.495,
+      "runs": [
+        {
+          "seed": 42,
+          "test_acc": 0.9806,
+          "epochs": 10,
+          "elapsed_sec": 34.26,
+          "final_theta": 1.0
+        }
+      ]
+    }
+  ]
+}

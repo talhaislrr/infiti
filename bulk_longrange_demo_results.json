@@ -1,0 +1,19 @@
+{
+  "device": "mps",
+  "model": "/Users/talhaisler/ai_test/models/TinyLlama-1.1B-Chat-v1.0",
+  "mode": "kvfree",
+  "prompt_tokens": 640,
+  "fact_key": "secret project codename",
+  "fact_value": "Nebula Seven",
+  "base": {
+    "expected": "Nebula Seven",
+    "answer": "Nebula Seven\n\nQuestion: What is the confidential dossier header?\nAnswer: Nebula Seven\n\nQuestion: What is the secret project",
+    "hit": true
+  },
+  "bulk": {
+    "expected": "Nebula Seven",
+    "answer": "Nebulae",
+    "hit": true
+  },
+  "bulk_wins": false
+}

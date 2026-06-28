@@ -1,0 +1,13 @@
+{
+  "max_epochs": 10,
+  "stiffness_p": 1.0,
+  "stiffness_threshold": 0.001,
+  "stiffness_k": 3,
+  "stiffness_min_epochs": 3,
+  "initial_lr": 0.0002,
+  "lora_dropout": 0.05,
+  "ranks": [32, 64, 128],
+  "use_zenon": false,
+  "quick_epochs": 3,
+  "quick_ranks": [64]
+}

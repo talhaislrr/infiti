@@ -1,0 +1,55 @@
+{
+  "device": "mps",
+  "sliding_window": 128,
+  "elapsed_sec": 82.2,
+  "results": [
+    {
+      "n_facts": 1,
+      "doc_len": 512,
+      "n_cases": 8,
+      "total_questions": 8,
+      "total_hits": 5,
+      "hit_rate": 0.625
+    },
+    {
+      "n_facts": 1,
+      "doc_len": 1024,
+      "n_cases": 8,
+      "total_questions": 8,
+      "total_hits": 5,
+      "hit_rate": 0.625
+    },
+    {
+      "n_facts": 1,
+      "doc_len": 2048,
+      "n_cases": 8,
+      "total_questions": 8,
+      "total_hits": 0,
+      "hit_rate": 0.0
+    },
+    {
+      "n_facts": 2,
+      "doc_len": 512,
+      "n_cases": 8,
+      "total_questions": 16,
+      "total_hits": 6,
+      "hit_rate": 0.375
+    },
+    {
+      "n_facts": 2,
+      "doc_len": 1024,
+      "n_cases": 8,
+      "total_questions": 16,
+      "total_hits": 5,
+      "hit_rate": 0.3125
+    },
+    {
+      "n_facts": 2,
+      "doc_len": 2048,
+      "n_cases": 8,
+      "total_questions": 16,
+      "total_hits": 4,
+      "hit_rate": 0.25
+    }
+  ]
+}
