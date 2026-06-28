@@ -158,11 +158,17 @@ def main():
     parser.add_argument("--sliding-window", type=int, default=512)
     parser.add_argument("--pure-bulk", action="store_true",
                         help="Decode sırasında erken KV tamamen kapat — saf BulkState testi")
-    parser.add_argument("--checkpoint", default=None)
+    parser.add_argument("--checkpoint", default=None,
+                        help="Swap checkpoint yolu")
+    parser.add_argument("--swap-checkpoint", default=None,
+                        help="--checkpoint ile aynı (geriye uyumluluk)")
     parser.add_argument("--quick", action="store_true", help="n_facts=[1,2], doc_lens=[512], n_cases=4")
     parser.add_argument("--device", default=None)
     parser.add_argument("--output", default="bulk_multifact_benchmark_results.json")
     args = parser.parse_args()
+
+    if args.swap_checkpoint:
+        args.checkpoint = args.checkpoint or args.swap_checkpoint
 
     if args.quick:
         args.n_facts = [1, 2]

@@ -77,7 +77,8 @@ def kv_seq_len(past: Any) -> int:
     return 0
 
 
-def make_chunk(tokenizer, target_tokens: int, seed: str) -> torch.Tensor:
+def make_chunk(tokenizer, target_tokens: int, seed: str, max_len: int = 2048) -> torch.Tensor:
+    target_tokens = min(target_tokens, max_len)
     text = seed + " "
     while len(tokenizer.encode(text, add_special_tokens=False)) < target_tokens:
         text += seed + " "
@@ -108,8 +109,8 @@ def run_scaling_proof(
     decode_steps: int,
 ) -> dict:
     text = "Scientific discovery advances through careful observation and experiment. "
-    short_ids = make_chunk(tokenizer, short_len, text)[:, :short_len].to(device)
-    long_ids = make_chunk(tokenizer, long_len, text)[:, :long_len].to(device)
+    short_ids = make_chunk(tokenizer, short_len, text, max_len=2048).to(device)
+    long_ids = make_chunk(tokenizer, long_len, text, max_len=2048).to(device)
 
     base_gen = BaseKVGenerator(base)
     _free(device)
@@ -349,13 +350,15 @@ def main() -> None:
     print(f"window={args.sliding_window} swap={args.swap_layers} budget={args.mem_budget_mb} MB")
     print("=" * 72)
 
-    base, tokenizer, model_path = load_tinyllama(device, dtype)
-    H = base.config.hidden_size
-    n_layers = base.config.num_hidden_layers
+    # Base ve KVFree ayrı yüklenmeli — swap katmanları base'i yerinde değiştirir.
+    base_clean, tokenizer, model_path = load_tinyllama(device, dtype)
+    H = base_clean.config.hidden_size
+    n_layers = base_clean.config.num_hidden_layers
     n_early = n_layers - args.swap_layers
 
+    base_k, _, _ = load_tinyllama(device, dtype)
     kvfree = TinyLlamaKVFreeTail(
-        base,
+        base_k,
         n_swap_layers=args.swap_layers,
         sliding_window=args.sliding_window,
         compact=True,
@@ -370,7 +373,7 @@ def main() -> None:
 
     print("\n[1/3] Decode ölçekleme (512 vs 2048)...")
     scaling = run_scaling_proof(
-        base, kvfree, tokenizer, device,
+        base_clean, kvfree, tokenizer, device,
         args.short_len, args.long_len, args.decode_steps,
     )
     print(
@@ -384,7 +387,7 @@ def main() -> None:
 
     print(f"\n[2/3] Çok turlu oturum ({args.turns} tur × {args.chunk_tokens}+{args.reply_tokens} tok)...")
     multiturn = run_multiturn_proof(
-        base, kvfree, tokenizer, device,
+        base_clean, kvfree, tokenizer, device,
         args.turns, args.chunk_tokens, args.reply_tokens,
         n_early, n_layers, H,
         args.sliding_window, args.d_bulk, args.swap_layers,
@@ -423,7 +426,7 @@ def main() -> None:
     Path(args.output).write_text(json.dumps(results, indent=2))
     print(f"\nKaydedildi: {args.output}")
 
-    del base, kvfree
+    del base_clean, base_k, kvfree
     _free(device)
 
 
