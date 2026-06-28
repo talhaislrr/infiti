@@ -52,13 +52,15 @@ def make_prompt(tokenizer, text: str, target: int, max_len: int = 2048) -> torch
 
 
 @torch.no_grad()
-def bench_recompute(model, ids: torch.Tensor, new_tokens: int) -> float:
-    cur = ids.clone()
+def bench_recompute(model, ids: torch.Tensor, new_tokens: int, max_len: int = 2048) -> float:
+    cur = ids[:, :max_len].clone()
     t0 = time.perf_counter()
     for _ in range(new_tokens):
         out = model(input_ids=cur)
         next_tok = out.logits[:, -1, :].argmax(-1, keepdim=True)
         cur = torch.cat([cur, next_tok], dim=1)
+        if cur.size(1) > max_len:
+            cur = cur[:, -max_len:]
     return (time.perf_counter() - t0) / new_tokens * 1000
 
 
@@ -157,7 +159,7 @@ def main():
     for plen in lens:
         ids = prompts[plen]
         _free(device)
-        ms_rec = bench_recompute(base, ids, args.new_tokens)
+        ms_rec = bench_recompute(base, ids, args.new_tokens, max_len=max_ctx)
         b_base = bench_base_kv(base, ids, args.new_tokens)
         dec_base.append(b_base["decode_ms_per_tok"])
         rec_ms.append(ms_rec)

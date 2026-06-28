@@ -136,31 +136,48 @@ class BulkTriggerLlamaLayer(nn.Module):
         self.k_short = bulk_layer.k_short
         self._compact = isinstance(bulk_layer, CompactBulkCore)
 
+    def _layer_dtype(self) -> torch.dtype:
+        return self.mlp.gate_proj.weight.dtype
+
+    def _to_layer(self, x: torch.Tensor) -> torch.Tensor:
+        dt = self._layer_dtype()
+        return x if x.dtype == dt else x.to(dtype=dt)
+
     def _bulk_attn(self, residual: torch.Tensor, h_ln: torch.Tensor) -> torch.Tensor:
+        wdt = self._layer_dtype()
         if self._compact:
-            h_out = self.bulk(h_ln)
-            return residual + (h_out - h_ln)
-        return residual + self.bulk(h_ln)
+            res_f, h_f = residual.float(), h_ln.float()
+            h_out = self.bulk(h_f)
+            return (res_f + (h_out - h_f)).to(wdt)
+        return (residual + self.bulk(h_ln.float())).to(wdt)
 
     def _bulk_attn_state(
         self, residual: torch.Tensor, h_ln: torch.Tensor,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
-        h_out, state = self.bulk.forward_with_state(h_ln)
+        wdt = self._layer_dtype()
         if self._compact:
-            return residual + (h_out - h_ln), state
-        return residual + h_out, state
+            res_f, h_f = residual.float(), h_ln.float()
+            h_out, state = self.bulk.forward_with_state(h_f)
+            return (res_f + (h_out - h_f)).to(wdt), state
+        h_out, state = self.bulk.forward_with_state(h_ln.float())
+        return (residual + h_out).to(wdt), state
 
     def _bulk_attn_step(
         self, residual: torch.Tensor, h_ln: torch.Tensor,
         window: torch.Tensor, state: BulkStateTensors,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
-        h_out, state = self.bulk.forward_step(h_ln, window, state)
+        wdt = self._layer_dtype()
         if self._compact:
-            return residual + (h_out - h_ln), state
-        return residual + h_out, state
+            res_f, h_f = residual.float(), h_ln.float()
+            w_f = window.float()
+            h_out, state = self.bulk.forward_step(h_f, w_f, state)
+            return (res_f + (h_out - h_f)).to(wdt), state
+        h_out, state = self.bulk.forward_step(h_ln.float(), window.float(), state)
+        return (residual + h_out).to(wdt), state
 
     def forward(self, hidden_states: torch.Tensor, **kwargs) -> tuple[torch.Tensor, ...]:
         del kwargs
+        hidden_states = self._to_layer(hidden_states)
         residual = hidden_states
         h_ln = self.input_layernorm(hidden_states)
         h = self._bulk_attn(residual, h_ln)
@@ -172,6 +189,7 @@ class BulkTriggerLlamaLayer(nn.Module):
     def forward_with_state(
         self, hidden_states: torch.Tensor,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
+        hidden_states = self._to_layer(hidden_states)
         residual = hidden_states
         h_ln = self.input_layernorm(hidden_states)
         h, state = self._bulk_attn_state(residual, h_ln)
@@ -186,6 +204,8 @@ class BulkTriggerLlamaLayer(nn.Module):
         window: torch.Tensor,
         state: BulkStateTensors,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
+        hidden_states = self._to_layer(hidden_states)
+        window = self._to_layer(window)
         residual = hidden_states
         h_ln = self.input_layernorm(hidden_states)
         h, state = self._bulk_attn_step(residual, h_ln, window, state)
@@ -432,7 +452,7 @@ class TinyLlamaKVFreeTail(nn.Module):
         h_bulk = self._to_bulk(hidden)
         for idx, bulk_layer in enumerate(self.bulk_layers):
             h_bulk, cache.bulk_states[idx] = bulk_layer.forward_with_state(h_bulk)
-        hidden = self._from_bulk(h_bulk)
+        hidden = h_bulk
 
         cache.pos = T
         normed = self.base.model.norm(hidden)
@@ -465,7 +485,7 @@ class TinyLlamaKVFreeTail(nn.Module):
             h_bulk, cache.bulk_states[idx] = bulk_layer.forward_step(
                 h_bulk, w_bulk, cache.bulk_states[idx],
             )
-        hidden = self._from_bulk(h_bulk)
+        hidden = h_bulk
 
         cache.pos += 1
         normed = self.base.model.norm(hidden)
