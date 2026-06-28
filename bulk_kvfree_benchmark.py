@@ -128,7 +128,6 @@ def main():
 
     device = pick_device(args.device)
     dtype = pick_dtype(device, train=False)
-    lens = [int(x.strip()) for x in args.prompt_lens.split(",") if x.strip()]
 
     print("=" * 72)
     print(f"Faz 3 KVFree Benchmark (sıralı) | {device_summary(device)}")
@@ -137,7 +136,13 @@ def main():
 
     _, tokenizer, model_path = load_tinyllama(device, dtype)
     text = "The history of science spans centuries of discovery and invention. "
-    prompts = {plen: make_prompt(tokenizer, text, plen).to(device) for plen in lens}
+    max_ctx = min(getattr(tokenizer, "model_max_length", 2048), 2048)
+    if max_ctx > 100_000:
+        max_ctx = 2048
+    lens = [min(int(x.strip()), max_ctx) for x in args.prompt_lens.split(",") if x.strip()]
+    prompts = {
+        plen: make_prompt(tokenizer, text, plen, max_len=max_ctx).to(device) for plen in lens
+    }
 
     rows = []
     dec_base, dec_hybrid, dec_kvfree, rec_ms = [], [], [], []

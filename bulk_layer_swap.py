@@ -338,8 +338,22 @@ class TinyLlamaKVFreeTail(nn.Module):
         ]
         self._cache = KVFreeCache(bulk_states=states, tail_hidden_hist=deque(), pos=0)
 
-    def _float(self, x: torch.Tensor) -> torch.Tensor:
+    def _base_dtype(self) -> torch.dtype:
+        return next(self.base.parameters()).dtype
+
+    def _bulk_dtype(self) -> torch.dtype:
+        """BulkState/compact swap fp32 — erken katman base dtype (fp16 cuda, fp32 mps)."""
+        return torch.float32
+
+    def _to_base(self, x: torch.Tensor) -> torch.Tensor:
+        dt = self._base_dtype()
+        return x if x.dtype == dt else x.to(dtype=dt)
+
+    def _to_bulk(self, x: torch.Tensor) -> torch.Tensor:
         return x.float() if x.dtype != torch.float32 else x
+
+    def _from_bulk(self, x: torch.Tensor) -> torch.Tensor:
+        return self._to_base(x)
 
     def _embed(self, input_ids: torch.Tensor) -> torch.Tensor:
         m = self.base.model
@@ -399,9 +413,9 @@ class TinyLlamaKVFreeTail(nn.Module):
     ) -> torch.Tensor:
         B, T = input_ids.shape
         device = input_ids.device
-        self.reset_cache(B, device, torch.float32)
+        self.reset_cache(B, device, self._bulk_dtype())
 
-        hidden = self._float(self._embed(input_ids))
+        hidden = self._to_base(self._embed(input_ids))
         cache = self._cache
         assert cache is not None
 
@@ -415,8 +429,10 @@ class TinyLlamaKVFreeTail(nn.Module):
         for t in range(T):
             cache.tail_hidden_hist.append(hidden[:, t, :].detach())
 
+        h_bulk = self._to_bulk(hidden)
         for idx, bulk_layer in enumerate(self.bulk_layers):
-            hidden, cache.bulk_states[idx] = bulk_layer.forward_with_state(hidden)
+            h_bulk, cache.bulk_states[idx] = bulk_layer.forward_with_state(h_bulk)
+        hidden = self._from_bulk(h_bulk)
 
         cache.pos = T
         normed = self.base.model.norm(hidden)
@@ -432,7 +448,7 @@ class TinyLlamaKVFreeTail(nn.Module):
         device = token_id.device
         cache_position = torch.tensor([cache.pos], device=device)
 
-        hidden = self._float(self._embed(token_id))
+        hidden = self._to_base(self._embed(token_id))
         hidden, cache.early_past = self._run_early(
             hidden, None, cache.early_past, use_cache=True, cache_position=cache_position,
         )
@@ -443,10 +459,13 @@ class TinyLlamaKVFreeTail(nn.Module):
         window = _build_window(cache.tail_hidden_hist, hidden, self.k_short)
         cache.tail_hidden_hist.append(hidden.squeeze(1).detach())
 
+        h_bulk = self._to_bulk(hidden)
+        w_bulk = self._to_bulk(window)
         for idx, bulk_layer in enumerate(self.bulk_layers):
-            hidden, cache.bulk_states[idx] = bulk_layer.forward_step(
-                hidden, window, cache.bulk_states[idx],
+            h_bulk, cache.bulk_states[idx] = bulk_layer.forward_step(
+                h_bulk, w_bulk, cache.bulk_states[idx],
             )
+        hidden = self._from_bulk(h_bulk)
 
         cache.pos += 1
         normed = self.base.model.norm(hidden)
@@ -473,13 +492,15 @@ class TinyLlamaKVFreeTail(nn.Module):
         from bulk_hybrid import HybridOutput
 
         with torch.no_grad():
-            hidden = self._float(self._embed(input_ids))
+            hidden = self._to_base(self._embed(input_ids))
             hidden, _ = self._run_early(hidden, attention_mask, None, use_cache=False)
 
+        h_bulk = self._to_bulk(hidden)
         for bulk_layer in self.bulk_layers:
-            hidden = bulk_layer(hidden)[0]
+            h_bulk = bulk_layer(h_bulk)[0]
+        hidden = self._from_bulk(h_bulk)
 
-        hidden = self.base.model.norm(hidden.float())
+        hidden = self.base.model.norm(hidden)
         logits = self.base.lm_head(hidden)
         loss = None
         if labels is not None:
