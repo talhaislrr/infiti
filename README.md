@@ -21,8 +21,11 @@ Checkpoint (`checkpoints/bulk_swap/bulk_v2.pt`) repoda yok — eğitim sonrası 
 # Benchmark
 python3 bulk_kvfree_benchmark.py --device mps --prompt-lens 512,2048 --skip-hybrid
 
-# Recall eğitimi
-python3 bulk_kvfree_train.py --recall --epochs 3 --device mps --resume checkpoints/bulk_swap/bulk_v2.pt
+# Recall eğitimi (Faz A+B: consolidate + surprise pin)
+python3 bulk_kvfree_train.py --memory --epochs 3 --device mps --resume checkpoints/bulk_swap/bulk_v2.pt
+
+# Klasik recall
+python3 bulk_kvfree_train.py --recall --epochs 3 --device mps --train-sw 512 --adaptive
 
 # Multi-turn chat (state persist)
 python3 bulk_chat.py --kvfree --device mps
@@ -45,9 +48,11 @@ python3 bulk_longrange_demo.py --kvfree --device mps --sliding-window 0
 ## Mimari
 
 ```
-[Layer 0–17]  Llama attention + KV-cache
+[Layer 0–17]  Llama attention + KV-cache (sliding_window ile sınırlı)
 [Layer 18–21] BulkTriggerDecoderLayerV2 (KV-free, BulkState)
 ```
+
+**Faz A+B bellek:** KV crop öncesi `consolidate` → bulk medium/long; yüksek sürpriz token → `pin_proj` ile long belleğe yazılır (`--adaptive`).
 
 ## Lisans
 

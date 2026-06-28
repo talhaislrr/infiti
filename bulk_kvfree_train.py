@@ -7,6 +7,7 @@ Faz 3 — KVFree kuyruk katman eğitimi (compact + recall)
   python3 bulk_kvfree_train.py --mix --epochs 3 --resume checkpoints/bulk_swap/bulk_v2.pt
   python3 bulk_kvfree_train.py --conv --epochs 3 --device mps   # chat recall
   python3 bulk_kvfree_train.py --multifact --n-facts 3 --epochs 3 --device mps
+  python3 bulk_kvfree_train.py --memory --epochs 3 --device cuda   # Faz A+B: sw512+adaptive+recall
 """
 
 from __future__ import annotations
@@ -103,12 +104,16 @@ def train_swap(
     accum_steps: int = 1,
     log_every: int = 5,
     train_sliding_window: int = 0,
+    recall_split: float = 0.0,
 ) -> list[float]:
+    """recall_split > 0 → forward_recall kullan (prefix BulkState, suffix-only loss)."""
     for layer in model.bulk_layers:
         layer.bulk.train()
     if train_sliding_window > 0:
         model.sliding_window = train_sliding_window
         print(f"  [train] sliding_window={train_sliding_window} — BulkState'i recall için zorluyor")
+    if recall_split > 0:
+        print(f"  [train] recall_split={recall_split:.0%} — iki aşamalı BulkState training")
     opt = torch.optim.AdamW(model.trainable_parameters(), lr=lr, weight_decay=0.01)
     n_batches = len(loader)
     losses: list[float] = []
@@ -118,7 +123,11 @@ def train_swap(
         t_ep = time.time()
         for step, (x, y) in enumerate(loader):
             x, y = x.to(device), y.to(device)
-            out = model(input_ids=x, labels=y)
+            if recall_split > 0:
+                split_pos = max(4, int(x.shape[1] * recall_split))
+                out = model.forward_recall(input_ids=x, split_pos=split_pos, labels=y)
+            else:
+                out = model(input_ids=x, labels=y)
             assert out.loss is not None
             (out.loss / accum_steps).backward()
             if (step + 1) % accum_steps == 0:
@@ -161,12 +170,32 @@ def main():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--swap-layers", type=int, default=4)
     parser.add_argument("--sliding-window", type=int, default=512)
-    parser.add_argument("--train-sw", type=int, default=128,
-                        help="Eğitim sırasında sliding_window (0=kapat). BulkState'i recall için zorlar.")
+    parser.add_argument("--train-sw", type=int, default=0,
+                        help="Eğitim sırasında sliding_window (0=kapat). --memory → 512")
+    parser.add_argument("--adaptive", action="store_true",
+                        help="Surprise-gated bulk pin (adaptive_trigger)")
+    parser.add_argument("--surprise-threshold", type=float, default=0.35,
+                        help="Long pin eşiği (adaptive mod)")
+    parser.add_argument("--memory", action="store_true",
+                        help="Faz A+B preset: train_sw=512, adaptive, recall_split, multifact mix")
+    parser.add_argument("--no-consolidate", action="store_true",
+                        help="KV crop öncesi bulk consolidate kapat")
+    parser.add_argument("--recall-split", type=float, default=0.75,
+                        help="forward_recall split oranı (0=kapat, 0.75=önerilen). Suffix-only loss.")
     parser.add_argument("--resume", default=None, help="Mevcut swap checkpoint")
     parser.add_argument("--device", default=None)
     parser.add_argument("--output", default="bulk_kvfree_train_results.json")
     args = parser.parse_args()
+
+    if args.memory:
+        if args.train_sw == 0:
+            args.train_sw = 512
+        args.adaptive = True
+        if not (args.recall or args.mix or args.conv or args.multifact):
+            args.multifact = True
+        if args.recall_split == 0.75 and not args.recall:
+            pass  # recall_split default 0.75 stays
+        print("  [--memory] preset: train_sw=512, adaptive, forward_recall")
 
     compact = not (args.full or args.no_compact)
     device = pick_device(args.device)
@@ -179,7 +208,10 @@ def main():
         128
     )
     batch_size = args.batch_size or 1
-    use_recall = args.recall or args.mix
+    use_recall = args.recall or args.mix or args.conv or args.multifact
+    use_recall_forward = args.recall_split > 0 and (
+        args.recall or args.mix or args.conv or args.multifact or args.memory
+    )
 
     if args.conv:
         mode = "conv"
@@ -195,6 +227,7 @@ def main():
     print("=" * 70)
     print(f"Faz 3 KVFree Swap | {device_summary(device)}")
     print(f"  mode={mode} compact={compact} seq={seq_len} batch={batch_size}")
+    print(f"  adaptive={args.adaptive} train_sw={args.train_sw or 0} recall_split={args.recall_split}")
     print("=" * 70)
 
     base, tokenizer, model_name = load_tinyllama(device, dtype)
@@ -257,7 +290,10 @@ def main():
     model = TinyLlamaKVFreeTail(
         base, n_swap_layers=args.swap_layers, sliding_window=args.sliding_window,
         compact=compact, d_bulk=args.d_bulk,
+        adaptive_trigger=args.adaptive,
+        surprise_threshold=args.surprise_threshold,
     ).to(device)
+    model.memory_consolidate = not args.no_consolidate
 
     resume = args.resume or ("checkpoints/bulk_swap/bulk_v2.pt" if (args.mix or args.conv or args.multifact) else None)
     if resume and Path(resume).exists():
@@ -271,6 +307,7 @@ def main():
     losses = train_swap(
         model, train_loader, device, epochs, args.lr, args.accum_steps,
         train_sliding_window=args.train_sw,
+        recall_split=args.recall_split if use_recall_forward else 0.0,
     )
     swap_ppl = eval_ppl(model, val_loader, device)
     train_sec = time.time() - t0
@@ -279,7 +316,7 @@ def main():
     save_bulk_swap_checkpoint(model, str(ckpt))
 
     recall_eval = {}
-    if use_recall or args.multifact:
+    if use_recall or args.multifact or args.memory:
         print("\nRecall eval (sliding_window=512)...")
         recall_eval["window_512"] = eval_recall_hit(model, tokenizer, device, sliding_window=512)
         print(f"  hit={recall_eval['window_512']['hits']}/{recall_eval['window_512']['n']}")
@@ -297,6 +334,11 @@ def main():
         "d_bulk": args.d_bulk,
         "swap_layers": args.swap_layers,
         "sliding_window": args.sliding_window,
+        "train_sw": args.train_sw,
+        "adaptive_trigger": args.adaptive,
+        "surprise_threshold": args.surprise_threshold,
+        "memory_consolidate": not args.no_consolidate,
+        "memory_preset": args.memory,
         "swap_params": n_params,
         "seq_len": seq_len,
         "epochs": epochs,

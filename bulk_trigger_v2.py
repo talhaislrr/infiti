@@ -62,11 +62,26 @@ class BulkTriggerDecoderLayerV2(nn.Module):
         out = self.generator(x_flat, kv_flat)
         return out.reshape(B, T, D)
 
-    def forward_step(self, x: torch.Tensor, window: torch.Tensor, state: BulkStateTensors) -> tuple[torch.Tensor, BulkStateTensors]:
-        """Tek token inference."""
-        new_state = self.bulk_mgr.update(window, state)
+    def forward_step(
+        self,
+        x: torch.Tensor,
+        window: torch.Tensor,
+        state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, BulkStateTensors]:
+        """Tek token inference — opsiyonel sürpriz ile long pin."""
+        new_state = self.bulk_mgr.update(window, state, surprise=surprise)
         out = self.generator(x, new_state.as_kv())
         return out, new_state
+
+    def consolidate_step(
+        self,
+        window: torch.Tensor,
+        state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
+    ) -> BulkStateTensors:
+        """KV crop öncesi yalnızca BulkState güncelle."""
+        return self.bulk_mgr.consolidate(window, state, surprise=surprise)
 
     def forward_with_state(
         self,

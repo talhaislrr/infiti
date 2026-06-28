@@ -16,7 +16,7 @@ from typing import Any, Optional
 import torch
 import torch.nn as nn
 
-from bulk_state import BulkStateTensors
+from bulk_state import BulkStateTensors, embedding_surprise, token_surprise
 from bulk_trigger_v2 import BulkTriggerDecoderLayerV2
 
 
@@ -96,8 +96,10 @@ class CompactBulkCore(nn.Module):
         h = self.bulk(self.proj_in(x))
         return x + self.gate.tanh() * self.proj_out(h)
 
-    def forward_with_state(self, x: torch.Tensor) -> tuple[torch.Tensor, BulkStateTensors]:
-        h, state = self.bulk.forward_with_state(self.proj_in(x))
+    def forward_with_state(
+        self, x: torch.Tensor, surprise: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, BulkStateTensors]:
+        h, state = self.bulk.forward_with_state(self.proj_in(x), surprise=surprise)
         return x + self.gate.tanh() * self.proj_out(h), state
 
     def forward_step(
@@ -105,9 +107,20 @@ class CompactBulkCore(nn.Module):
         x: torch.Tensor,
         window: torch.Tensor,
         state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
-        h, state = self.bulk.forward_step(self.proj_in(x), self.proj_in(window), state)
+        h, state = self.bulk.forward_step(
+            self.proj_in(x), self.proj_in(window), state, surprise=surprise,
+        )
         return x + self.gate.tanh() * self.proj_out(h), state
+
+    def consolidate_step(
+        self,
+        window: torch.Tensor,
+        state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
+    ) -> BulkStateTensors:
+        return self.bulk.consolidate_step(self.proj_in(window), state, surprise=surprise)
 
 
 def _bulk_d_state(bulk: nn.Module, fallback: int) -> int:
@@ -165,14 +178,17 @@ class BulkTriggerLlamaLayer(nn.Module):
     def _bulk_attn_step(
         self, residual: torch.Tensor, h_ln: torch.Tensor,
         window: torch.Tensor, state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
         wdt = self._layer_dtype()
         if self._compact:
             res_f, h_f = residual.float(), h_ln.float()
             w_f = window.float()
-            h_out, state = self.bulk.forward_step(h_f, w_f, state)
+            h_out, state = self.bulk.forward_step(h_f, w_f, state, surprise=surprise)
             return (res_f + (h_out - h_f)).to(wdt), state
-        h_out, state = self.bulk.forward_step(h_ln.float(), window.float(), state)
+        h_out, state = self.bulk.forward_step(
+            h_ln.float(), window.float(), state, surprise=surprise,
+        )
         return (residual + h_out).to(wdt), state
 
     def forward(self, hidden_states: torch.Tensor, **kwargs) -> tuple[torch.Tensor, ...]:
@@ -188,11 +204,18 @@ class BulkTriggerLlamaLayer(nn.Module):
 
     def forward_with_state(
         self, hidden_states: torch.Tensor,
+        surprise: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
         hidden_states = self._to_layer(hidden_states)
         residual = hidden_states
         h_ln = self.input_layernorm(hidden_states)
-        h, state = self._bulk_attn_state(residual, h_ln)
+        if self._compact:
+            res_f, h_f = residual.float(), h_ln.float()
+            h_out, state = self.bulk.forward_with_state(h_f, surprise=surprise)
+            h = (res_f + (h_out - h_f)).to(self._layer_dtype())
+        else:
+            h_out, state = self.bulk.forward_with_state(h_ln.float(), surprise=surprise)
+            h = (residual + h_out).to(self._layer_dtype())
         residual = h
         h = self.post_attention_layernorm(h)
         h = self.mlp(h)
@@ -203,16 +226,28 @@ class BulkTriggerLlamaLayer(nn.Module):
         hidden_states: torch.Tensor,
         window: torch.Tensor,
         state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, BulkStateTensors]:
         hidden_states = self._to_layer(hidden_states)
         window = self._to_layer(window)
         residual = hidden_states
         h_ln = self.input_layernorm(hidden_states)
-        h, state = self._bulk_attn_step(residual, h_ln, window, state)
+        h, state = self._bulk_attn_step(residual, h_ln, window, state, surprise=surprise)
         residual = h
         h = self.post_attention_layernorm(h)
         h = self.mlp(h)
         return residual + h, state
+
+    def consolidate_step(
+        self,
+        window: torch.Tensor,
+        state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
+    ) -> BulkStateTensors:
+        window = self._to_layer(window)
+        if self._compact:
+            return self.bulk.consolidate_step(window.float(), state, surprise=surprise)
+        return self.bulk.consolidate_step(window.float(), state, surprise=surprise)
 
 
 def install_bulk_v2_swap(
@@ -267,6 +302,26 @@ def _build_window(hist: deque, h_t: torch.Tensor, k_short: int) -> torch.Tensor:
         pad = [items[0]] * (k_short - len(items))
         items = pad + items
     return torch.stack(items[-k_short:], dim=1)
+
+
+def _build_window_at_index(hist: list[torch.Tensor], idx: int, k_short: int) -> torch.Tensor:
+    """Geçmiş konum idx için pencere → [B, k_short, H]."""
+    start = max(0, idx - k_short + 1)
+    items = [hist[i] for i in range(start, idx + 1)]
+    if len(items) < k_short:
+        pad = [items[0]] * (k_short - len(items))
+        items = pad + items
+    return torch.stack(items[-k_short:], dim=1)
+
+
+def kv_seq_len(past: Any) -> int:
+    if past is None:
+        return 0
+    if hasattr(past, "key_cache") and past.key_cache:
+        return int(past.key_cache[0].size(-2))
+    if isinstance(past, (list, tuple)) and past and past[0] is not None:
+        return int(past[0][0].size(-2))
+    return 0
 
 
 def truncate_past_key_values(past: Any, max_len: int) -> Any:
@@ -324,6 +379,9 @@ class TinyLlamaKVFreeTail(nn.Module):
         self.compact = compact
         self.d_bulk = d_bulk
         self.pure_bulk = False  # True → decode'da erken KV tamamen devre dışı
+        self.adaptive_trigger = adaptive_trigger
+        self.surprise_threshold = surprise_threshold
+        self.memory_consolidate = True  # KV crop öncesi bulk'a yaz
 
         n_heads = max(1, getattr(base_model.config, "num_attention_heads", 32) // 8)
         self.bulk_layers, self.n_early, self.n_swap = install_bulk_v2_swap(
@@ -377,8 +435,74 @@ class TinyLlamaKVFreeTail(nn.Module):
         return self._to_base(x)
 
     def _embed(self, input_ids: torch.Tensor) -> torch.Tensor:
-        m = self.base.model
-        return m.embed_tokens(input_ids)
+        return self.base.model.embed_tokens(input_ids)
+
+    def _run_bulk_tail(
+        self,
+        hidden: torch.Tensor,
+        cache: KVFreeCache,
+        stepwise: bool = False,
+        surprise_seq: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        if stepwise:
+            window = _build_window(cache.tail_hidden_hist, hidden, self.k_short)
+            surprise = None
+            if self.adaptive_trigger and len(cache.tail_hidden_hist) > 1:
+                surprise = self._surprise_for_index(cache, len(cache.tail_hidden_hist) - 1)
+            w_bulk = self._to_bulk(window)
+            h_bulk = self._to_bulk(hidden)
+            for idx, bulk_layer in enumerate(self.bulk_layers):
+                h_bulk, cache.bulk_states[idx] = bulk_layer.forward_step(
+                    h_bulk, w_bulk, cache.bulk_states[idx], surprise=surprise,
+                )
+            return self._from_bulk(h_bulk)
+
+        h_bulk = self._to_bulk(hidden)
+        sur = surprise_seq
+        if sur is None and self.adaptive_trigger:
+            sur = embedding_surprise(hidden)
+        for idx, bulk_layer in enumerate(self.bulk_layers):
+            h_bulk, cache.bulk_states[idx] = bulk_layer.forward_with_state(h_bulk, surprise=sur)
+        return self._from_bulk(h_bulk)
+
+    def _surprise_for_index(self, cache: KVFreeCache, idx: int) -> Optional[torch.Tensor]:
+        if not self.adaptive_trigger:
+            return None
+        hist = list(cache.tail_hidden_hist)
+        return token_surprise(hist, idx)
+
+    def _consolidate_range(self, cache: KVFreeCache, start: int, end: int) -> None:
+        """KV'den düşen token aralığını [start, end) bulk state'e yaz."""
+        if not self.memory_consolidate or start >= end:
+            return
+        hist = list(cache.tail_hidden_hist)
+        if not hist:
+            return
+        end = min(end, len(hist))
+        for idx in range(start, end):
+            window = _build_window_at_index(hist, idx, self.k_short)
+            surprise = self._surprise_for_index(cache, idx)
+            w_bulk = self._to_bulk(window)
+            for layer_idx, layer in enumerate(self.bulk_layers):
+                cache.bulk_states[layer_idx] = layer.consolidate_step(
+                    w_bulk, cache.bulk_states[layer_idx], surprise=surprise,
+                )
+
+    def _apply_sliding_window(self, cache: KVFreeCache, *, prefill: bool = False) -> None:
+        """Crop öncesi consolidate, sonra KV kırp."""
+        if self.sliding_window <= 0 or self.pure_bulk:
+            return
+        kv_len = kv_seq_len(cache.early_past)
+        if kv_len <= self.sliding_window:
+            return
+        n_evict = kv_len - self.sliding_window
+        if prefill:
+            start, end = 0, n_evict
+        else:
+            start = cache.pos - self.sliding_window
+            end = start + n_evict
+        self._consolidate_range(cache, start, end)
+        cache.early_past = truncate_past_key_values(cache.early_past, self.sliding_window)
 
     def _run_early(
         self,
@@ -444,17 +568,13 @@ class TinyLlamaKVFreeTail(nn.Module):
             hidden, attention_mask, None, use_cache=True,
         )
 
-        if self.sliding_window > 0:
-            cache.early_past = truncate_past_key_values(cache.early_past, self.sliding_window)
-
         for t in range(T):
             cache.tail_hidden_hist.append(hidden[:, t, :].detach())
 
-        h_bulk = self._to_bulk(hidden)
-        for idx, bulk_layer in enumerate(self.bulk_layers):
-            h_bulk, cache.bulk_states[idx] = bulk_layer.forward_with_state(h_bulk)
-        hidden = h_bulk
+        cache.pos = T
+        self._apply_sliding_window(cache, prefill=True)
 
+        hidden = self._run_bulk_tail(hidden, cache, stepwise=False)
         cache.pos = T
         normed = self.base.model.norm(hidden)
         return self.base.lm_head(normed)[:, -1, :]
@@ -480,19 +600,13 @@ class TinyLlamaKVFreeTail(nn.Module):
             hidden, cache.early_past = self._run_early(
                 hidden, None, cache.early_past, use_cache=True, cache_position=cache_position,
             )
-            if self.sliding_window > 0:
-                cache.early_past = truncate_past_key_values(cache.early_past, self.sliding_window)
+            cache.tail_hidden_hist.append(hidden.squeeze(1).detach())
+            self._apply_sliding_window(cache)
 
-        window = _build_window(cache.tail_hidden_hist, hidden, self.k_short)
-        cache.tail_hidden_hist.append(hidden.squeeze(1).detach())
+        if self.pure_bulk:
+            cache.tail_hidden_hist.append(hidden.squeeze(1).detach())
 
-        h_bulk = self._to_bulk(hidden)
-        w_bulk = self._to_bulk(window)
-        for idx, bulk_layer in enumerate(self.bulk_layers):
-            h_bulk, cache.bulk_states[idx] = bulk_layer.forward_step(
-                h_bulk, w_bulk, cache.bulk_states[idx],
-            )
-        hidden = h_bulk
+        hidden = self._run_bulk_tail(hidden, cache, stepwise=True)
 
         cache.pos += 1
         normed = self.base.model.norm(hidden)
@@ -538,6 +652,67 @@ class TinyLlamaKVFreeTail(nn.Module):
             )
         return HybridOutput(logits=logits, loss=loss)
 
+    def forward_recall(
+        self,
+        input_ids: torch.Tensor,
+        split_pos: int,
+        labels: Optional[torch.Tensor] = None,
+    ):
+        """Prefix BulkState doldurur; suffix yalnızca kendi early + taşınan BulkState ile."""
+        import torch.nn.functional as F
+        from bulk_hybrid import HybridOutput
+
+        B, T = input_ids.shape
+        device = input_ids.device
+        split_pos = max(4, min(split_pos, T - 4))
+
+        with torch.no_grad():
+            h_pre = self._to_base(self._embed(input_ids[:, :split_pos]))
+            h_pre, _ = self._run_early(h_pre, None, None, use_cache=False)
+
+        surprise = embedding_surprise(h_pre) if self.adaptive_trigger else None
+        h_bulk = self._to_bulk(h_pre)
+        states: list[BulkStateTensors] = []
+        for layer in self.bulk_layers:
+            h_bulk, st = layer.forward_with_state(h_bulk, surprise=surprise)
+            states.append(st)
+
+        with torch.no_grad():
+            h_suf = self._to_base(self._embed(input_ids[:, split_pos:]))
+            t_suf = h_suf.shape[1]
+            pos = torch.arange(t_suf, device=device)
+            h_suf, _ = self._run_early(
+                h_suf, None, None, use_cache=False, cache_position=pos,
+            )
+
+        suffix_hist: deque = deque()
+        out_tokens: list[torch.Tensor] = []
+        for t in range(t_suf):
+            h_t = h_suf[:, t, :].unsqueeze(1)
+            suffix_hist.append(h_suf[:, t, :])
+            window = _build_window(suffix_hist, h_t, self.k_short)
+            h = h_t
+            sur_t = None
+            if self.adaptive_trigger and t > 0:
+                sur_t = (h_suf[:, t, :] - h_suf[:, t - 1, :]).norm(dim=-1)
+            for idx, layer in enumerate(self.bulk_layers):
+                h, states[idx] = layer.forward_step(h, window, states[idx], surprise=sur_t)
+            out_tokens.append(h.squeeze(1))
+
+        hidden_suf = torch.stack(out_tokens, dim=1)
+        normed = self.base.model.norm(hidden_suf)
+        logits_suf = self.base.lm_head(normed)
+
+        loss = None
+        if labels is not None:
+            suf_labels = labels[:, split_pos:]
+            loss = F.cross_entropy(
+                logits_suf.reshape(-1, logits_suf.size(-1)),
+                suf_labels.reshape(-1),
+                ignore_index=-100,
+            )
+        return HybridOutput(logits=logits_suf, loss=loss)
+
 
 def estimate_early_kv_bytes(
     seq_len: int,
@@ -571,6 +746,9 @@ def save_bulk_swap_checkpoint(model: TinyLlamaKVFreeTail, path: str) -> None:
             "sliding_window": model.sliding_window,
             "compact": model.compact,
             "d_bulk": model.d_bulk,
+            "adaptive_trigger": model.adaptive_trigger,
+            "surprise_threshold": model.surprise_threshold,
+            "memory_consolidate": model.memory_consolidate,
             "bulk_layers": [layer.bulk.state_dict() for layer in model.bulk_layers],
         },
         p,
@@ -596,7 +774,7 @@ def load_bulk_swap_checkpoint(model: TinyLlamaKVFreeTail, path: str, device) -> 
             f"Katman sayısı uyuşmuyor: ckpt={len(states)} model={len(model.bulk_layers)}"
         )
     for layer, state in zip(model.bulk_layers, ckpt.get("bulk_layers", [])):
-        layer.bulk.load_state_dict(state)
+        layer.bulk.load_state_dict(state, strict=False)
 
 
 def count_swap_params(model: TinyLlamaKVFreeTail) -> int:

@@ -32,6 +32,18 @@ class BulkStateTensors:
         return cls(short=z.clone(), medium=z.clone(), long=z.clone(), step=0)
 
 
+def token_surprise(hist: list[torch.Tensor], idx: int) -> Optional[torch.Tensor]:
+    """Hist içinde idx konumundaki token sürprizi [B]."""
+    if idx <= 0 or idx >= len(hist):
+        return None
+    prev, cur = hist[idx - 1], hist[idx]
+    if cur.dim() == 1:
+        cur = cur.unsqueeze(0)
+    if prev.dim() == 1:
+        prev = prev.unsqueeze(0)
+    return (cur - prev).norm(dim=-1)
+
+
 def embedding_surprise(x: torch.Tensor) -> torch.Tensor:
     """Pozisyon başına sürpriz skoru: ardışık embedding farkının normu [B, T]."""
     B, T, _ = x.shape
@@ -79,9 +91,26 @@ class BulkStateManager(nn.Module):
             nn.Sigmoid(),
         )
         self.long_proj = nn.Linear(d_model, d_model)
+        self.pin_proj = nn.Linear(d_model, d_model)
         self.norm_short = nn.LayerNorm(d_model)
         self.norm_medium = nn.LayerNorm(d_model)
         self.norm_long = nn.LayerNorm(d_model)
+
+    def _pin_long(
+        self,
+        long: torch.Tensor,
+        medium: torch.Tensor,
+        short: torch.Tensor,
+        surprise: torch.Tensor,
+    ) -> torch.Tensor:
+        """Yüksek sürpriz token'ı long belleğe sabitle (decay'e karşı)."""
+        pin_w = torch.sigmoid(surprise - self.surprise_threshold)
+        if pin_w.dim() == 1:
+            pin_w = pin_w.unsqueeze(-1)
+        pinned = self.pin_proj(short)
+        gate = self.long_gate(torch.cat([long, medium], dim=-1))
+        blended = gate * long + (1.0 - gate) * self.long_proj(medium)
+        return self.norm_long((1.0 - pin_w) * blended + pin_w * pinned)
 
     def _advance_without_short(
         self, state: BulkStateTensors, last_short_enc: torch.Tensor
@@ -118,8 +147,9 @@ class BulkStateManager(nn.Module):
         state: BulkStateTensors,
         force_medium: bool = False,
         force_long: bool = False,
+        surprise: Optional[torch.Tensor] = None,
     ) -> BulkStateTensors:
-        """window: [B, k_short, d_model]"""
+        """window: [B, k_short, d_model] — surprise: [B] adaptif long pin."""
         short = self.norm_short(self.short_encoder(window))
         step = state.step + 1
         medium = state.medium
@@ -132,7 +162,29 @@ class BulkStateManager(nn.Module):
             gate = self.long_gate(torch.cat([long, medium], dim=-1))
             long = self.norm_long(gate * long + (1.0 - gate) * self.long_proj(medium))
 
+        if (
+            self.adaptive_trigger
+            and surprise is not None
+            and bool((surprise > self.surprise_threshold).any())
+        ):
+            long = self._pin_long(long, medium, short, surprise)
+
         return BulkStateTensors(short=short, medium=medium, long=long, step=step)
+
+    def consolidate(
+        self,
+        window: torch.Tensor,
+        state: BulkStateTensors,
+        surprise: Optional[torch.Tensor] = None,
+    ) -> BulkStateTensors:
+        """KV crop öncesi — token bulk'a zorla yaz; yüksek sürpriz → long pin."""
+        return self.update(
+            window,
+            state,
+            force_medium=True,
+            force_long=True,
+            surprise=surprise,
+        )
 
     def evolve_sequence(
         self,
