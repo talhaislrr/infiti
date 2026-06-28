@@ -109,6 +109,7 @@ def eval_multifact(
     cases = []
 
     old_sw = model.sliding_window
+    old_pb = getattr(model, "pure_bulk", False)
     model.sliding_window = sliding_window
 
     for _ in range(n_cases):
@@ -136,6 +137,7 @@ def eval_multifact(
         cases.append({"values": values, "hits": hits_this, "answers": answers})
 
     model.sliding_window = old_sw
+    model.pure_bulk = old_pb
     hit_rate = total_hits / max(total_questions, 1)
     return {
         "n_facts": n_facts,
@@ -154,6 +156,8 @@ def main():
     parser.add_argument("--doc-lens", type=int, nargs="+", default=[512, 2048, 8192])
     parser.add_argument("--n-cases", type=int, default=8)
     parser.add_argument("--sliding-window", type=int, default=512)
+    parser.add_argument("--pure-bulk", action="store_true",
+                        help="Decode sırasında erken KV tamamen kapat — saf BulkState testi")
     parser.add_argument("--checkpoint", default=None)
     parser.add_argument("--quick", action="store_true", help="n_facts=[1,2], doc_lens=[512], n_cases=4")
     parser.add_argument("--device", default=None)
@@ -174,6 +178,10 @@ def main():
     print("=" * 65)
 
     model, tokenizer = _build_model(device, dtype, args.checkpoint)
+
+    if args.pure_bulk:
+        model.pure_bulk = True
+        print("  MOD: pure_bulk — erken KV devre dışı, saf BulkState testi")
 
     results = []
     t0 = time.time()
@@ -206,6 +214,7 @@ def main():
     payload = {
         "device": str(device),
         "sliding_window": args.sliding_window,
+        "pure_bulk": args.pure_bulk,
         "elapsed_sec": round(elapsed, 1),
         "results": results,
     }

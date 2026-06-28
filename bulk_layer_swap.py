@@ -323,6 +323,7 @@ class TinyLlamaKVFreeTail(nn.Module):
         self.freeze_base = freeze_base
         self.compact = compact
         self.d_bulk = d_bulk
+        self.pure_bulk = False  # True → decode'da erken KV tamamen devre dışı
 
         n_heads = max(1, getattr(base_model.config, "num_attention_heads", 32) // 8)
         self.bulk_layers, self.n_early, self.n_swap = install_bulk_v2_swap(
@@ -469,12 +470,18 @@ class TinyLlamaKVFreeTail(nn.Module):
         cache_position = torch.tensor([cache.pos], device=device)
 
         hidden = self._to_base(self._embed(token_id))
-        hidden, cache.early_past = self._run_early(
-            hidden, None, cache.early_past, use_cache=True, cache_position=cache_position,
-        )
 
-        if self.sliding_window > 0:
-            cache.early_past = truncate_past_key_values(cache.early_past, self.sliding_window)
+        if self.pure_bulk:
+            # Erken KV tamamen devre dışı — BulkState tek başına
+            hidden, _ = self._run_early(
+                hidden, None, None, use_cache=False, cache_position=cache_position,
+            )
+        else:
+            hidden, cache.early_past = self._run_early(
+                hidden, None, cache.early_past, use_cache=True, cache_position=cache_position,
+            )
+            if self.sliding_window > 0:
+                cache.early_past = truncate_past_key_values(cache.early_past, self.sliding_window)
 
         window = _build_window(cache.tail_hidden_hist, hidden, self.k_short)
         cache.tail_hidden_hist.append(hidden.squeeze(1).detach())
