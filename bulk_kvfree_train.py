@@ -102,9 +102,13 @@ def train_swap(
     lr: float,
     accum_steps: int = 1,
     log_every: int = 5,
+    train_sliding_window: int = 0,
 ) -> list[float]:
     for layer in model.bulk_layers:
         layer.bulk.train()
+    if train_sliding_window > 0:
+        model.sliding_window = train_sliding_window
+        print(f"  [train] sliding_window={train_sliding_window} — BulkState'i recall için zorluyor")
     opt = torch.optim.AdamW(model.trainable_parameters(), lr=lr, weight_decay=0.01)
     n_batches = len(loader)
     losses: list[float] = []
@@ -157,6 +161,8 @@ def main():
     parser.add_argument("--lr", type=float, default=1e-4)
     parser.add_argument("--swap-layers", type=int, default=4)
     parser.add_argument("--sliding-window", type=int, default=512)
+    parser.add_argument("--train-sw", type=int, default=128,
+                        help="Eğitim sırasında sliding_window (0=kapat). BulkState'i recall için zorlar.")
     parser.add_argument("--resume", default=None, help="Mevcut swap checkpoint")
     parser.add_argument("--device", default=None)
     parser.add_argument("--output", default="bulk_kvfree_train_results.json")
@@ -262,7 +268,10 @@ def main():
     print(f"  swap params = {n_params:,}")
 
     t0 = time.time()
-    losses = train_swap(model, train_loader, device, epochs, args.lr, args.accum_steps)
+    losses = train_swap(
+        model, train_loader, device, epochs, args.lr, args.accum_steps,
+        train_sliding_window=args.train_sw,
+    )
     swap_ppl = eval_ppl(model, val_loader, device)
     train_sec = time.time() - t0
 
