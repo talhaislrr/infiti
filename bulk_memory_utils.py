@@ -2,8 +2,30 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import torch
 import torch.nn.functional as F
+
+
+def kv_seq_len(past: Any) -> int:
+    """KV cache uzunluğu — transformers 4.x tuple ve 5.x DynamicCache uyumu."""
+    if past is None:
+        return 0
+    if hasattr(past, "get_seq_length"):
+        try:
+            n = int(past.get_seq_length())
+            if n > 0:
+                return n
+        except (TypeError, ValueError, AttributeError):
+            pass
+    if hasattr(past, "key_cache") and past.key_cache:
+        for k in past.key_cache:
+            if k is not None and k.numel() > 0:
+                return int(k.size(-2))
+    if isinstance(past, (list, tuple)) and past and past[0] is not None:
+        return int(past[0][0].size(-2))
+    return 0
 
 
 def token_loss_surprise(

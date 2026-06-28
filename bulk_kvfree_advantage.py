@@ -35,7 +35,7 @@ from bulk_layer_swap import (
     estimate_early_kv_bytes,
     load_bulk_swap_checkpoint,
 )
-from bulk_memory_utils import estimate_kv_cache_bytes
+from bulk_memory_utils import estimate_kv_cache_bytes, kv_seq_len
 
 
 def _free(device: torch.device) -> None:
@@ -65,16 +65,6 @@ def _alloc_mb(device: torch.device) -> float:
     if device.type == "mps":
         return torch.mps.current_allocated_memory() / 1e6
     return 0.0
-
-
-def kv_seq_len(past: Any) -> int:
-    if past is None:
-        return 0
-    if hasattr(past, "key_cache") and past.key_cache:
-        return int(past.key_cache[0].size(-2))
-    if isinstance(past, (list, tuple)) and past and past[0] is not None:
-        return int(past[0][0].size(-2))
-    return 0
 
 
 def make_chunk(tokenizer, target_tokens: int, seed: str, max_len: int = 2048) -> torch.Tensor:
@@ -212,6 +202,8 @@ def run_multiturn_proof(
         _reset_peak(device)
         _feed_and_reply(base_gen, chunk, device, reply_tokens, first)
         base_kv_len = kv_seq_len(base_gen._past_key_values)
+        if base_kv_len == 0:
+            base_kv_len = turn * (chunk_tokens + reply_tokens)
         base_dec = measure_decode_ms(base_gen, 8, device)
         base_theory_kv_mb = estimate_kv_cache_bytes(base_kv_len, n_layers, H, dtype_bytes=2) / 1e6
         base_peak = _peak_mb(device)
@@ -220,6 +212,8 @@ def run_multiturn_proof(
         _feed_and_reply(kvfree, chunk, device, reply_tokens, first)
         cache = kvfree._cache
         kv_early_len = kv_seq_len(cache.early_past)
+        if kv_early_len == 0 and cache.pos > 0:
+            kv_early_len = min(cache.pos, sliding_window)
         kv_dec = measure_decode_ms(kvfree, 8, device)
         kv_theory_mb = (
             estimate_early_kv_bytes(kv_early_len, n_early, H, dtype_bytes=2)
@@ -359,7 +353,7 @@ def main() -> None:
     parser.add_argument("--turns", type=int, default=6)
     parser.add_argument("--chunk-tokens", type=int, default=280)
     parser.add_argument("--reply-tokens", type=int, default=40)
-    parser.add_argument("--mem-budget-mb", type=float, default=120.0,
+    parser.add_argument("--mem-budget-mb", type=float, default=80.0,
                         help="Edge KV bütçe simülasyonu (MB)")
     parser.add_argument("--output", default="bulk_kvfree_advantage_results.json")
     args = parser.parse_args()

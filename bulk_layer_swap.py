@@ -17,6 +17,7 @@ import torch
 import torch.nn as nn
 
 from bulk_state import BulkStateTensors, embedding_surprise, token_surprise
+from bulk_memory_utils import kv_seq_len
 from bulk_trigger_v2 import BulkTriggerDecoderLayerV2
 
 
@@ -312,16 +313,6 @@ def _build_window_at_index(hist: list[torch.Tensor], idx: int, k_short: int) -> 
         pad = [items[0]] * (k_short - len(items))
         items = pad + items
     return torch.stack(items[-k_short:], dim=1)
-
-
-def kv_seq_len(past: Any) -> int:
-    if past is None:
-        return 0
-    if hasattr(past, "key_cache") and past.key_cache:
-        return int(past.key_cache[0].size(-2))
-    if isinstance(past, (list, tuple)) and past and past[0] is not None:
-        return int(past[0][0].size(-2))
-    return 0
 
 
 def truncate_past_key_values(past: Any, max_len: int) -> Any:
